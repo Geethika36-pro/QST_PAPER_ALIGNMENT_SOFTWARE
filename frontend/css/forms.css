@@ -1,0 +1,206 @@
+/**
+ * Form Controls, Question Forms & Dynamic Field Lists
+ */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.form-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-body);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-label-required::after {
+  content: "*";
+  color: var(--color-danger-solid);
+  margin-left: 2px;
+}
+
+.form-hint {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  color: var(--color-text-main);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.form-control::placeholder {
+  color: var(--color-text-dim);
+}
+
+.form-control-sm {
+  padding: 0.35rem 0.55rem;
+  font-size: var(--font-size-xs);
+}
+
+textarea.form-control {
+  min-height: 72px;
+  resize: vertical;
+}
+
+/* Select Dropdown */
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 14px;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+/* Question Type Selector Bar */
+.qtype-selector-strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  background: var(--color-surface-muted);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* Form Section / Group Box */
+.sub-box {
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sub-box-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-800);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Options Grid for MCQ / Sequence / Match */
+.options-grid-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 600px) {
+  .options-grid-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.option-input-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.option-prefix {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-700);
+  width: 24px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* Match Columns Grid */
+.match-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .match-columns-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.match-column-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Dynamic Item Rows (Subquestions, Places) */
+.dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dynamic-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+}
+
+.dynamic-row-num {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.dynamic-row .form-control {
+  border-color: transparent;
+  background-color: transparent;
+  padding: 0.35rem 0.5rem;
+}
+
+.dynamic-row .form-control:focus {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-surface);
+}
+
+.marks-input-wrapper {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+/* Form Action Buttons Bar */
+.form-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+}
