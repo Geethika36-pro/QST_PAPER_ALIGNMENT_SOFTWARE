@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question Paper Alignment Software | CBSE &amp; ICSE Exam Formatter</title>
+  <meta name="description" content="Interactive Question Paper Alignment Software for school teachers to edit, structure, preview, and format standard examination papers.">
+  
+  <!-- Design System & Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/preview.css">
+  <link rel="stylesheet" href="css/modal.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+
+  <!-- Top Application Header & Toolbar -->
+  <header id="app-header" class="app-header" role="banner"></header>
+
+  <!-- Mobile View Switcher (Visible on tablets and mobile screens) -->
+  <nav class="mobile-view-tabs" aria-label="Mobile View Selector">
+    <button id="tab-btn-editor" class="mobile-tab-btn active">
+      <span>✏️</span>
+      <span>Question Editor</span>
+    </button>
+    <button id="tab-btn-preview" class="mobile-tab-btn">
+      <span>👁️</span>
+      <span>Paper Preview</span>
+    </button>
+  </nav>
+
+  <!-- Two-Pane Workspace -->
+  <main class="workspace-container" role="main">
+    <!-- Left Pane: Question Paper Editor -->
+    <section class="pane-editor" aria-label="Question Paper Editor">
+      <!-- Paper Details Header Form -->
+      <div id="header-form-container"></div>
+
+      <!-- Sections & Question Management List -->
+      <div id="section-list-container"></div>
+    </section>
+
+    <!-- Right Pane: Live Examination Paper Preview -->
+    <section class="pane-preview mobile-hidden" aria-label="Live Examination Paper Preview">
+      <div id="preview-pane-container" style="display: flex; flex-direction: column; height: 100%;"></div>
+    </section>
+  </main>
+
+  <!-- Modal / Dialog Mount Points -->
+  <div id="modal-root"></div>
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
