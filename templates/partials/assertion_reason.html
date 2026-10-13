@@ -1,0 +1,9 @@
+<div class='q'>
+  <p><b>{{ row.no }}.</b> Assertion (A): {{ row.q.get('assertion', '') }}</p>
+  <p class='reason'>Reason (R): {{ row.q.get('reason', '') }}</p>
+  <div class='opts-list'>
+    {% for o in row.q.get('options', []) %}
+    <p>{{ 'ABCD'[loop.index0] }}) {{ o }}</p>
+    {% endfor %}
+  </div>
+</div>

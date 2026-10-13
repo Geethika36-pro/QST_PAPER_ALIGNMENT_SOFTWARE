@@ -1,0 +1,7 @@
+<div class='q'>
+  <p><b>{{ row.no }}.</b> Read the following paragraph and answer the questions given below</p>
+  <p class='passage'>{{ row.q.get('passage', '') }}</p>
+  {% for sq in row.q.get('subQuestions', []) %}
+  <p class='sub'>{{ loop.index }}. {{ sq.get('text', '') }} <span class='subm'>({{ sq.get('marks', 1) }})</span></p>
+  {% endfor %}
+</div>

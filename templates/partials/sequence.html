@@ -1,0 +1,13 @@
+<div class='q'>
+  <p><b>{{ row.no }}.</b> {{ row.q.get('text', '') }}</p>
+  <div class='seq-items'>
+    {% for it in row.q.get('items', []) %}
+    <p>({{ ['i', 'ii', 'iii', 'iv', 'v', 'vi'][loop.index0] }}) {{ it }}</p>
+    {% endfor %}
+  </div>
+  <div class='opts-grid'>
+    {% for o in row.q.get('options', []) %}
+    <span>{{ 'ABCDEFGH'[loop.index0] }}. {{ o }}</span>
+    {% endfor %}
+  </div>
+</div>

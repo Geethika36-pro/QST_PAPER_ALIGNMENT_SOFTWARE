@@ -1,0 +1,8 @@
+<div class='q'>
+  <p><b>{{ row.no }}.</b> {{ row.q.get('text', '') }}</p>
+  <div class='opts-grid'>
+    {% for p in row.q.get('places', []) %}
+    <span>{{ loop.index }}. {{ p }}</span>
+    {% endfor %}
+  </div>
+</div>

@@ -1,0 +1,325 @@
+{
+  "school": "ST JOHN THE BAPTIST'S ENGLISH SCHOOL NEDUMKUNNAM",
+  "exam": "FIRST TERMINAL EXAMINATION 2026-2027",
+  "class": "VII",
+  "subject": "SOCIAL SCIENCE",
+  "time": "3hrs",
+  "totalMarks": 80,
+  "sections": [
+    {
+      "label": "A",
+      "marksPerQuestion": 1,
+      "instruction": "Choose the correct answer from the brackets",
+      "questions": [
+        {
+          "type": "mcq",
+          "text": "Which island in the Andaman and Nicobar Islands is home to the only active volcano in India?",
+          "options": [
+            "Havelock Island",
+            "Barren Island",
+            "Ross Island",
+            "Neil Island"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Junbeel Mela, a unique fair where barter system is still practised, is held in which Indian state?",
+          "options": [
+            "Meghalaya",
+            "Manipur",
+            "Nagaland",
+            "Assam"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "What makes a place sacred for a community?",
+          "options": [
+            "Its size",
+            "Its connection with beliefs, traditions and religious practices",
+            "Its policy",
+            "Its climate"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Which of the following is an example of a sacred landscape in India?",
+          "options": [
+            "A shopping mall",
+            "A pilgrimage centre",
+            "An industrial area",
+            "A railway station"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Which of the following is an important function of money?",
+          "options": [
+            "It acts as a medium of exchange",
+            "It can only be used for buying food",
+            "It prevents people from trading",
+            "It has no value"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Why did people begin using money instead of the barter system?",
+          "options": [
+            "Money made exchange easier and more convenient",
+            "Money could only be used for food",
+            "Barter was faster than using money",
+            "Money could not be stored"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Name the delta located in West Bengal, known for its mangrove forests and the Royal Bengal Tiger.",
+          "options": [
+            "Godavari Delta",
+            "Krishna Delta",
+            "Sundarbans Delta",
+            "Mahanadi Delta"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "What is a heap of sand formed by wind in a desert called?",
+          "options": [
+            "Delta",
+            "Sand Dune",
+            "Plateau",
+            "Glacier"
+          ]
+        },
+        {
+          "type": "sequence",
+          "text": "Arrange the following events in chronological order:",
+          "items": [
+            "Ashoka fought the Kalinga War",
+            "Rise of Magadha as a powerful mahajanapada",
+            "Chandragupta Maurya founded the Mauryan Empire",
+            "Alexander invaded North"
+          ],
+          "options": [
+            "(ii) → (iv) → (iii) → (i)",
+            "(iii) → (i) → (ii) → (iv)",
+            "(i) → (iv) → (iii) → (ii)",
+            "(i) → (iv) → (ii) → (iii)"
+          ]
+        },
+        {
+          "type": "assertion_reason",
+          "assertion": "The introduction of coins was a major step forward from the barter system.",
+          "reason": "Coins made it easier to buy, sell, and store value compared to exchanging goods directly.",
+          "options": [
+            "Both A and R are true, and R is the correct explanation of A.",
+            "Both A and R are true, but R is not the correct explanation of A.",
+            "A is true, but R is false.",
+            "A is false, but R is true."
+          ]
+        },
+        {
+          "type": "match",
+          "columnA": [
+            "Barometer",
+            "Rain gauge",
+            "Hygrometer",
+            "Anemometer"
+          ],
+          "columnB": [
+            "Measures wind direction",
+            "Measures humidity",
+            "Measures atmospheric pressure",
+            "Measures rainfall"
+          ],
+          "options": [
+            "(1-d) (2-a) (3-b) (4-c)",
+            "(1-c) (2-d) (3-b) (4-a)",
+            "(1-a) (2-c) (3-d) (4-b)",
+            "(1-c) (2-b) (3-c) (4-a)"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Panini is famous for his contribution to which field?",
+          "options": [
+            "Astronomy",
+            "Medicine",
+            "Sanskrit grammar",
+            "Architecture"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Gangotri Glacier, one of the largest glaciers in the Indian Himalayas, is the source of which major Indian river?",
+          "options": [
+            "Yamuna",
+            "Ganga",
+            "Brahmaputra",
+            "Indus"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "A large painting or artwork created directly on a wall or ceiling is known as a:",
+          "options": [
+            "Sketch",
+            "Mural",
+            "Portrait",
+            "Fresco"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "In which year was the Rupee symbol (₹) officially adopted by the Government of India?",
+          "options": [
+            "2008",
+            "2010",
+            "2012",
+            "2015"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Prayagraj hosts the Kumbh Mela every:",
+          "options": [
+            "3 years",
+            "6 years",
+            "9 years",
+            "12 years"
+          ]
+        },
+        {
+          "type": "mcq",
+          "text": "Which community is traditionally associated with New Zealand?",
+          "options": [
+            "Māori",
+            "Inuit",
+            "Maasai",
+            "Sami"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "B",
+      "marksPerQuestion": 2,
+      "questions": [
+        {
+          "type": "short",
+          "text": "How are the Himalayas classified?"
+        },
+        {
+          "type": "short",
+          "text": "Why Lakshadweep islands are called Coral Islands?"
+        },
+        {
+          "type": "short",
+          "text": "What do you know about the monarchy?"
+        },
+        {
+          "type": "short",
+          "text": "What is meant by the term 'sacredness'? Give two examples of Sacred place"
+        },
+        {
+          "type": "short",
+          "text": "Differentiate between Oligarchy and Theocracy."
+        },
+        {
+          "type": "short",
+          "text": "Define Barter system."
+        },
+        {
+          "type": "short",
+          "text": "Name the instrument used to measure rainfall. How it works?"
+        }
+      ]
+    },
+    {
+      "label": "C",
+      "marksPerQuestion": 3,
+      "questions": [
+        {
+          "type": "short",
+          "text": "Name the mahajanapada that rose to become the first empire in North India, and explain the reasons behind its development."
+        },
+        {
+          "type": "short",
+          "text": "Describe the twofold system that prevailed in ancient Indian society. Discuss how these two systems were organised and how they were related to each other."
+        },
+        {
+          "type": "short",
+          "text": "Distinguish between direct democracy and representative democracy."
+        },
+        {
+          "type": "short",
+          "text": "\"Ashoka is considered a great communicator.\" What are the reasons behind this statement."
+        },
+        {
+          "type": "short",
+          "text": "What were the main limitations of the Barter System? Explain any three with examples."
+        },
+        {
+          "type": "short",
+          "text": "How does the division of responsibilities among different organs of government help in the smooth functioning of a democracy."
+        },
+        {
+          "type": "short",
+          "text": "Why do people feel breathless, dizzy, or tired at high altitudes?"
+        }
+      ]
+    },
+    {
+      "label": "D",
+      "marksPerQuestion": 5,
+      "questions": [
+        {
+          "type": "long",
+          "text": "Name the organisation provides an excellent example of the self-organising abilities of Indian society. Explain"
+        },
+        {
+          "type": "long",
+          "text": "Explain Kautilya's central philosophy of governance and discuss its connection with Indian values."
+        },
+        {
+          "type": "long",
+          "text": "What is the importance of pilgrimage in Indian culture?"
+        },
+        {
+          "type": "long",
+          "text": "\"The evolution of money reflects the changing needs of society and trade.\" Discuss this statement by tracing the journey of money from coinage to paper money and finally to digital money."
+        }
+      ]
+    },
+    {
+      "label": "E",
+      "marksPerQuestion": 4,
+      "questions": [
+        {
+          "type": "passage",
+          "passage": "In ancient times, coins were among the earliest forms of money. Different kingdoms issued their own coins for use in trade and daily transactions. The process of producing these coins was called minting, and a mint was the facility where coins were manufactured. Powerful rulers controlled the coinage of their kingdom entirely — their coins were accepted across various territories, which helped trade flourish across regions. Coins were usually made from precious metals like gold, silver, and copper, or from an alloy.",
+          "subQuestions": [
+            {
+              "text": "Why do you think each kingdom wanted to issue its own coins instead of using another kingdom's coins?",
+              "marks": 2
+            },
+            {
+              "text": "Suppose a trader travelled from one kingdom to another and found that his coins were not accepted there. What problem would this create, and how might it be solved?",
+              "marks": 2
+            }
+          ]
+        },
+        {
+          "type": "map",
+          "text": "Locate the following places in an Outline map of India",
+          "places": [
+            "Shatrunjaya hill",
+            "Great stupa at Sanchi",
+            "Velankanni church",
+            "Sabarimala"
+          ]
+        }
+      ]
+    }
+  ]
+}

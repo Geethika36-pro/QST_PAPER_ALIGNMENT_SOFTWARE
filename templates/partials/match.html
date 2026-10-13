@@ -1,0 +1,18 @@
+<div class='q'>
+  <p><b>{{ row.no }}.</b> Match the following</p>
+  <table class='match'>
+    <tr><th>Column A</th><th>Column B</th></tr>
+    {% set colb = row.q.get('columnB', []) %}
+    {% for a in row.q.get('columnA', []) %}
+    <tr>
+      <td>{{ loop.index }}. {{ a }}</td>
+      <td>({{ 'abcdefgh'[loop.index0] }}) {{ colb[loop.index0] if loop.index0 < colb|length else '' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div class='opts-grid'>
+    {% for o in row.q.get('options', []) %}
+    <span>{{ 'ABCD'[loop.index0] }}. {{ o }}</span>
+    {% endfor %}
+  </div>
+</div>

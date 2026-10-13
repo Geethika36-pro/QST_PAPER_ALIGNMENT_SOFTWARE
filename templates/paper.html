@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <style>{{ css|safe }}</style>
+</head>
+<body>
+  <header class='paper-head'>
+    <h1>{{ paper.get('school', '') }}</h1>
+    <h2>{{ paper.get('exam', '') }}</h2>
+    <div class='meta'>
+      <span>CLASS - {{ paper.get('class', '') }} {{ paper.get('subject', '') }}</span>
+      <span>TIME - {{ paper.get('time', '') }}</span>
+      <span>MARKS - {{ paper.get('totalMarks', '') }}</span>
+    </div>
+  </header>
+
+  {% for s in sections %}
+  <section>
+    <h3><span>Section {{ s.label }}</span><span>{{ s.marks_line }}</span></h3>
+    {% if s.instruction %}<p class='instruction'>{{ s.instruction }}</p>{% endif %}
+    {% for row in s.rows %}
+      {% include 'partials/' ~ row.tpl ~ '.html' %}
+    {% endfor %}
+  </section>
+  {% endfor %}
+</body>
+</html>
