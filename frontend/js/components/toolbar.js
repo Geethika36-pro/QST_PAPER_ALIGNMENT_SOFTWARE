@@ -146,7 +146,7 @@ export class ToolbarComponent {
       icon.textContent = '⬇';
 
       if (res.success) {
-        ModalService.toast('PDF downloaded successfully!', 'success');
+        ModalService.toast(`PDF downloaded to your Downloads folder: ${res.filename || 'exam_paper.pdf'}`, 'success');
       } else {
         ModalService.showModal({
           title: 'PDF Generation Error',
