@@ -6,9 +6,15 @@
 
 let activeAbortController = null;
 let currentRequestId = 0;
-
 export const ApiService = {
-  baseUrl: localStorage.getItem('qp_backend_url') || 'http://127.0.0.1:8000',
+  baseUrl: (() => {
+    const saved = localStorage.getItem('qp_backend_url');
+    if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+    if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+      return window.location.origin;
+    }
+    return 'http://127.0.0.1:8000';
+  })(),
 
   setBaseUrl(url) {
     this.baseUrl = url.trim().replace(/\/+$/, '');
@@ -140,18 +146,40 @@ export const ApiService = {
       }
 
       const blob = await res.blob();
-      const filename = `${(paper.school || 'exam_paper').toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 30)}_exam_paper.pdf`;
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
       
-      const downloadUrl = window.URL.createObjectURL(blob);
+      // Determine filename from Content-Disposition header or paper metadata
+      let filename = 'exam_paper.pdf';
+      const disposition = res.headers.get('Content-Disposition');
+      if (disposition && disposition.includes('filename=')) {
+        const match = disposition.match(/filename=["']?([^"';]+)["']?/i);
+        if (match && match[1]) {
+          filename = match[1].trim();
+        }
+      } else {
+        const schoolName = (paper.school || 'exam_paper')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_+|_+$/g, '')
+          .slice(0, 30) || 'exam_paper';
+        filename = `${schoolName}.pdf`;
+      }
+
+      const downloadUrl = window.URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = downloadUrl;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(downloadUrl);
-      a.remove();
 
-      return { success: true };
+      // Delay cleanup to allow browser to initiate system download to Downloads folder
+      setTimeout(() => {
+        window.URL.revokeObjectURL(downloadUrl);
+        a.remove();
+      }, 2000);
+
+      return { success: true, filename };
     } catch (err) {
       return { success: false, error: `Connection failed: ${err.message}` };
     }
