@@ -1,11 +1,10 @@
 /**
  * Top Toolbar Component
- * Controls: Open, Save, Load Sample, Download PDF, Backend Status, Save Status
+ * Controls: New Paper, Load Sample, Download PDF, Backend Status, Save Status
  */
 
 import { store } from '../state.js';
 import { ApiService } from '../api.js';
-import { FileIOService } from '../utils/fileIO.js';
 import { ModalService } from './modal.js';
 
 export class ToolbarComponent {
@@ -42,17 +41,10 @@ export class ToolbarComponent {
 
         <div class="toolbar-divider"></div>
 
-        <!-- File & Action Buttons -->
-        <input type="file" id="file-input-open" accept=".json,application/json" style="display: none;" />
-        
-        <button id="btn-open-file" class="btn btn-secondary" title="Open an existing question paper JSON file">
-          <span>📂</span>
-          <span>Open</span>
-        </button>
-
-        <button id="btn-save-file" class="btn btn-secondary" title="Export current paper as JSON file">
-          <span>💾</span>
-          <span>Save</span>
+        <!-- Action Buttons -->
+        <button id="btn-new-paper" class="btn btn-secondary" title="Create a new blank question paper">
+          <span>📝</span>
+          <span>New Paper</span>
         </button>
 
         <button id="btn-load-sample" class="btn btn-secondary" title="Load Class VII Social Science sample paper">
@@ -74,46 +66,34 @@ export class ToolbarComponent {
   }
 
   bindEvents() {
-    const fileInput = this.container.querySelector('#file-input-open');
-    const btnOpen = this.container.querySelector('#btn-open-file');
-    const btnSave = this.container.querySelector('#btn-save-file');
+    const btnNewPaper = this.container.querySelector('#btn-new-paper');
     const btnSample = this.container.querySelector('#btn-load-sample');
     const btnPdf = this.container.querySelector('#btn-download-pdf');
     const btnPrint = this.container.querySelector('#btn-print-preview');
     const btnBackend = this.container.querySelector('#btn-backend-status');
 
-    // Open file
-    btnOpen.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    // New Paper
+    btnNewPaper.addEventListener('click', () => {
+      const handleConfirm = () => {
+        store.clearPaper();
+        ModalService.toast('New blank question paper created!', 'info');
+      };
 
-      const result = await FileIOService.importPaperFromFile(file);
-      fileInput.value = ''; // Reset input
-
-      if (result.success) {
-        store.loadPaper(result.paper);
-        ModalService.toast('Question paper imported successfully!', 'success');
-      } else {
-        const errorMsg = result.validationErrors
-          ? result.validationErrors.join('<br>')
-          : result.error;
-        ModalService.showModal({
-          title: 'Error Importing File',
-          contentHtml: `<div style="color: var(--color-danger-text); font-size: var(--font-size-sm); line-height: 1.6;">${errorMsg}</div>`,
-          buttons: [{ text: 'Close', className: 'btn-secondary' }]
-        });
+      // Support environments where window.confirm is stubbed/mocked
+      if (typeof window.confirm === 'function' && !window.confirm.toString().includes('[native code]')) {
+        if (window.confirm('Are you sure you want to create a new question paper?')) {
+          handleConfirm();
+        }
+        return;
       }
-    });
 
-    // Save file
-    btnSave.addEventListener('click', () => {
-      const res = FileIOService.exportPaper(store.paper);
-      if (res.success) {
-        ModalService.toast(`Exported ${res.filename}`, 'success');
-      } else {
-        ModalService.toast(`Export failed: ${res.error}`, 'error');
-      }
+      ModalService.confirm({
+        title: 'Create New Question Paper?',
+        message: 'Are you sure you want to create a new question paper? All current headers, sections, and questions will be cleared.',
+        confirmText: 'Confirm',
+        confirmClass: 'btn-primary',
+        onConfirm: handleConfirm
+      });
     });
 
     // Load Sample

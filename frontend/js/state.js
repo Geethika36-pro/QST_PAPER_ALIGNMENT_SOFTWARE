@@ -191,22 +191,26 @@ class StateStore {
   }
 
   clearPaper() {
-    this.loadPaper({
+    if (this.autosaveTimer) {
+      clearTimeout(this.autosaveTimer);
+      this.autosaveTimer = null;
+    }
+    this.paper = {
       school: '',
       exam: '',
       class: '',
       subject: '',
-      time: '3hrs',
-      totalMarks: 80,
-      sections: [
-        {
-          label: 'A',
-          marksPerQuestion: 1,
-          instruction: '',
-          questions: []
-        }
-      ]
-    });
+      time: '',
+      totalMarks: '',
+      sections: []
+    };
+    this.activeSectionIndex = 0;
+    this.editingQuestion = null;
+    this.isDirty = false;
+    StorageService.savePaper(this.paper);
+    this.notify('paper_loaded');
+    this.notify('saved_state');
+    this.notify('reset_zoom');
   }
 
   // --- Autosave & Dirty tracking ---

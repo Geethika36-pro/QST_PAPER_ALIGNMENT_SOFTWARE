@@ -37,7 +37,6 @@ export class PreviewPaneComponent {
           <button id="btn-zoom-out" class="btn btn-secondary btn-sm" title="Zoom Out">－</button>
           <span id="zoom-level-text" class="zoom-level-label">100%</span>
           <button id="btn-zoom-in" class="btn btn-secondary btn-sm" title="Zoom In">＋</button>
-          <button id="btn-zoom-reset" class="btn btn-secondary btn-sm" title="Reset Zoom">Reset</button>
 
           <div class="toolbar-divider" style="margin: 0 4px;"></div>
 
@@ -65,23 +64,21 @@ export class PreviewPaneComponent {
 
   bindEvents() {
     // Zoom Controls
-    const zoomText = this.container.querySelector('#zoom-level-text');
-    const paperSheet = this.container.querySelector('#paper-sheet');
-
-    const updateZoom = (newZoom) => {
-      this.zoom = Math.min(1.5, Math.max(0.6, Math.round(newZoom * 10) / 10));
-      zoomText.textContent = `${Math.round(this.zoom * 100)}%`;
-      paperSheet.style.transform = `scale(${this.zoom})`;
-    };
-
-    this.container.querySelector('#btn-zoom-in').addEventListener('click', () => updateZoom(this.zoom + 0.1));
-    this.container.querySelector('#btn-zoom-out').addEventListener('click', () => updateZoom(this.zoom - 0.1));
-    this.container.querySelector('#btn-zoom-reset').addEventListener('click', () => updateZoom(1.0));
+    this.container.querySelector('#btn-zoom-in').addEventListener('click', () => this.updateZoom(this.zoom + 0.1));
+    this.container.querySelector('#btn-zoom-out').addEventListener('click', () => this.updateZoom(this.zoom - 0.1));
 
     // Force Refresh
     this.container.querySelector('#btn-refresh-preview').addEventListener('click', () => {
       this.triggerPreviewUpdate(true);
     });
+  }
+
+  updateZoom(newZoom) {
+    const zoomText = this.container.querySelector('#zoom-level-text');
+    const paperSheet = this.container.querySelector('#paper-sheet');
+    this.zoom = Math.min(1.5, Math.max(0.6, Math.round(newZoom * 10) / 10));
+    if (zoomText) zoomText.textContent = `${Math.round(this.zoom * 100)}%`;
+    if (paperSheet) paperSheet.style.transform = `scale(${this.zoom})`;
   }
 
   schedulePreviewUpdate(delayMs = 400) {
@@ -127,8 +124,8 @@ export class PreviewPaneComponent {
       return;
     }
 
-    // Handle HTTP 422 Validation Error from backend
-    if (result.status === 422) {
+    // Handle HTTP 422 or 400 Validation Error from backend
+    if (result.status === 422 || result.status === 400) {
       sourceBadge.className = 'preview-source-badge source-client';
       sourceBadge.textContent = 'Backend Error 422';
 
@@ -172,6 +169,7 @@ export class PreviewPaneComponent {
 
     const fallbackHtml = renderClientHtml(store.paper);
     this.injectHtmlToIframe(iframe, fallbackHtml);
+    if (isManual) ModalService.toast('Preview refreshed', 'info');
   }
 
   injectHtmlToIframe(iframe, html) {
@@ -187,6 +185,10 @@ export class PreviewPaneComponent {
   }
 
   onStateChange(event) {
+    if (event === 'reset_zoom') {
+      this.updateZoom(1.0);
+    }
+
     if (
       event === 'header_change' ||
       event === 'section_added' ||
@@ -195,10 +197,14 @@ export class PreviewPaneComponent {
       event === 'question_added' ||
       event === 'question_updated' ||
       event === 'question_deleted' ||
-      event === 'question_reordered' ||
-      event === 'paper_loaded'
+      event === 'question_reordered'
     ) {
       this.schedulePreviewUpdate(400);
+    }
+
+    if (event === 'paper_loaded') {
+      this.updateZoom(1.0);
+      this.triggerPreviewUpdate();
     }
   }
 }
