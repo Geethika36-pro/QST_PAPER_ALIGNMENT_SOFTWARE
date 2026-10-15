@@ -1,3 +1,7 @@
 <div class='q'>
   <p><b>{{ row.no }}.</b> {{ row.q.get('text', '') }}</p>
+  {% if row.q.get('figure') %}
+    {% set fig = row.q.get('figure') %}
+    {% include 'partials/_figure.html' %}
+  {% endif %}
 </div>

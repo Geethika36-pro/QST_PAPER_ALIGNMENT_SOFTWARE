@@ -90,6 +90,7 @@ export class SectionListComponent {
                 <div class="question-header-info">
                   <span class="question-number-badge">#${globalNum}</span>
                   <span class="qtype-badge qtype-${qtype}">${typeNames[qtype] || qtype}</span>
+                  ${q.figure && q.figure.src ? '<span class="qtype-badge figure-badge" title="Question includes a figure">🖼️ Figure</span>' : ''}
                 </div>
                 <div class="question-actions">
                   <button class="btn btn-secondary btn-sm btn-icon btn-move-up" data-qindex="${qIdx}" ${isFirst ? 'disabled' : ''} title="Move Question Up">

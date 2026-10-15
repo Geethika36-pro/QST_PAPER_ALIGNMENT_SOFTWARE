@@ -1,7 +1,11 @@
 <div class='q'>
   <p><b>{{ row.no }}.</b> {{ row.q.get('text', '') }}</p>
+  {% if row.q.get('figure') %}
+    {% set fig = row.q.get('figure') %}
+    {% include 'partials/_figure.html' %}
+  {% endif %}
   <div class='opts-grid'>
-    {% for o in row.q.get('options', []) %}
+    {% for o in row.q.get('options', []) if o and o|trim %}
     <span>{{ 'ABCDEFGH'[loop.index0] }}) {{ o }}</span>
     {% endfor %}
   </div>

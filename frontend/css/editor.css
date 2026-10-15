@@ -301,3 +301,124 @@
   font-size: var(--font-size-sm);
   max-width: 320px;
 }
+
+/* Figure Badge in Question Card */
+.figure-badge {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid var(--color-border-medium);
+}
+
+/* Math Symbol Palette */
+.math-palette-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  margin-bottom: 12px;
+}
+
+.math-palette-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  margin-right: 4px;
+}
+
+.btn-math-sym {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1.2;
+  transition: all var(--transition-fast);
+  color: var(--color-text-main);
+  user-select: none;
+}
+
+.btn-math-sym:hover {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-700);
+}
+
+/* Figure Box in Question Form */
+.figure-editor-box {
+  background: var(--color-surface-muted);
+  border: 1px dashed var(--color-border-medium);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-top: 14px;
+}
+
+.figure-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.figure-editor-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.figure-dropzone {
+  border: 2px dashed var(--color-border-medium);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  background-color: var(--color-surface);
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.figure-dropzone:hover, .figure-dropzone.dragover {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+.figure-preview-layout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.figure-thumbnail-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.figure-thumbnail {
+  max-width: 140px;
+  max-height: 100px;
+  object-fit: contain;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.figure-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.figure-controls-grid .field-full {
+  grid-column: 1 / -1;
+}
+

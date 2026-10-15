@@ -1,6 +1,6 @@
 /**
  * Central Reactive State Manager
- * Coordinates paper data, section selection, question editing, and preview status.
+ * Coordinates paper data, section selection, question editing, style settings, and preview status.
  */
 
 import { SAMPLE_PAPER } from './sampleData.js';
@@ -14,6 +14,8 @@ class StateStore {
     // Load initial paper from LocalStorage if available, otherwise use sample paper
     const saved = StorageService.loadPaper();
     this.paper = saved || JSON.parse(JSON.stringify(SAMPLE_PAPER));
+    this.ensureStyleDefaults();
+
     this.activeSectionIndex = 0;
     this.editingQuestion = null; // { sectionIndex, questionIndex, isNew, data }
 
@@ -26,6 +28,22 @@ class StateStore {
     this.previewHtml = '';
     this.previewError = null;
     this.zoomLevel = 1.0;
+  }
+
+  ensureStyleDefaults() {
+    if (!this.paper.style || typeof this.paper.style !== 'object' || Array.isArray(this.paper.style)) {
+      this.paper.style = { fontFamily: 'Times New Roman', fontSize: 11 };
+    } else {
+      if (!this.paper.style.fontFamily) {
+        this.paper.style.fontFamily = 'Times New Roman';
+      }
+      if (this.paper.style.fontSize === undefined || this.paper.style.fontSize === null) {
+        this.paper.style.fontSize = 11;
+      } else {
+        const num = Number(this.paper.style.fontSize);
+        this.paper.style.fontSize = isNaN(num) ? 11 : num;
+      }
+    }
   }
 
   subscribe(listener) {
@@ -41,6 +59,14 @@ class StateStore {
         console.error('State listener error:', err);
       }
     }
+  }
+
+  // --- Paper Style mutations ---
+  updateStyle(field, value) {
+    this.ensureStyleDefaults();
+    this.paper.style[field] = field === 'fontSize' ? (Number(value) || 11) : value;
+    this.markDirty();
+    this.notify('style_change', { field, value: this.paper.style[field] });
   }
 
   // --- Header mutations ---
@@ -180,6 +206,7 @@ class StateStore {
   // --- Entire paper replacement ---
   loadPaper(newPaper) {
     this.paper = JSON.parse(JSON.stringify(newPaper));
+    this.ensureStyleDefaults();
     this.activeSectionIndex = 0;
     this.editingQuestion = null;
     this.markDirty();
@@ -202,6 +229,7 @@ class StateStore {
       subject: '',
       time: '',
       totalMarks: '',
+      style: { fontFamily: 'Times New Roman', fontSize: 11 },
       sections: []
     };
     this.activeSectionIndex = 0;
@@ -230,6 +258,8 @@ class StateStore {
         this.isDirty = false;
         this.lastSavedTime = res.timestamp;
         this.notify('saved_state', { timestamp: res.timestamp });
+      } else {
+        this.notify('autosave_failed', { isQuotaExceeded: res.isQuotaExceeded, error: res.error });
       }
     }, 1000);
   }

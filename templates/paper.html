@@ -2,7 +2,13 @@
 <html>
 <head>
   <meta charset='utf-8'>
-  <style>{{ css|safe }}</style>
+  <style>
+    :root {
+      --paper-font: {{ font_stack|safe }};
+      --paper-size: {{ font_size }}pt;
+    }
+    {{ css|safe }}
+  </style>
 </head>
 <body>
   <header class='paper-head'>

@@ -1,22 +1,42 @@
 /**
  * Paper Header Form Component
- * Controlled inputs for School, Exam, Class, Subject, Time, Total Marks
+ * Controlled inputs for School, Exam, Class, Subject, Time, Total Marks, and Page Style (Font & Size).
  */
 
 import { store } from '../state.js';
+import { ApiService, FALLBACK_OPTIONS } from '../api.js';
 
 export class HeaderFormComponent {
   constructor(containerEl) {
     this.container = containerEl;
     this.isCollapsed = false;
+    this.options = FALLBACK_OPTIONS;
+
+    this.initOptions();
     this.render();
     this.bindEvents();
     store.subscribe((event) => this.onStateChange(event));
   }
 
+  async initOptions() {
+    this.options = await ApiService.getOptions();
+    this.render();
+    this.bindEvents();
+  }
+
   render() {
     const { paper } = store;
     const summary = store.calculateMarksSummary();
+    const currentFont = paper.style?.fontFamily || 'Times New Roman';
+    const currentSize = paper.style?.fontSize !== undefined ? Number(paper.style.fontSize) : 11;
+
+    const fontOptionsHtml = (this.options.fonts || FALLBACK_OPTIONS.fonts).map(f => `
+      <option value="${f}" ${f === currentFont ? 'selected' : ''}>${f}</option>
+    `).join('');
+
+    const sizeOptionsHtml = (this.options.sizes || FALLBACK_OPTIONS.sizes).map(s => `
+      <option value="${s}" ${s === currentSize ? 'selected' : ''}>${s} pt</option>
+    `).join('');
 
     this.container.innerHTML = `
       <div class="editor-card header-card">
@@ -60,6 +80,21 @@ export class HeaderFormComponent {
             <div class="form-group">
               <label class="form-label form-label-required" for="input-total-marks">Total Marks</label>
               <input type="number" id="input-total-marks" class="form-control" placeholder="80" value="${paper.totalMarks ?? 80}" min="1" max="500" />
+            </div>
+
+            <!-- Page Style Controls -->
+            <div class="form-group">
+              <label class="form-label" for="select-paper-font">Font Family</label>
+              <select id="select-paper-font" class="form-control">
+                ${fontOptionsHtml}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="select-paper-size">Font Size (Base)</label>
+              <select id="select-paper-size" class="form-control">
+                ${sizeOptionsHtml}
+              </select>
             </div>
           </div>
         </div>
@@ -116,6 +151,20 @@ export class HeaderFormComponent {
     bindInput('#input-subject', 'subject');
     bindInput('#input-time', 'time');
     bindInput('#input-total-marks', 'totalMarks', true);
+
+    const fontSelect = this.container.querySelector('#select-paper-font');
+    if (fontSelect) {
+      fontSelect.addEventListener('change', (e) => {
+        store.updateStyle('fontFamily', e.target.value);
+      });
+    }
+
+    const sizeSelect = this.container.querySelector('#select-paper-size');
+    if (sizeSelect) {
+      sizeSelect.addEventListener('change', (e) => {
+        store.updateStyle('fontSize', Number(e.target.value));
+      });
+    }
   }
 
   onStateChange(event) {
@@ -126,9 +175,9 @@ export class HeaderFormComponent {
       event === 'section_updated' ||
       event === 'question_added' ||
       event === 'question_deleted' ||
-      event === 'header_change'
+      event === 'header_change' ||
+      event === 'style_change'
     ) {
-      // Re-render header to keep summary and values in sync
       const activeEl = document.activeElement;
       const activeId = activeEl ? activeEl.id : null;
       const cursorStart = activeEl ? activeEl.selectionStart : null;
@@ -146,7 +195,7 @@ export class HeaderFormComponent {
             try {
               restoredEl.setSelectionRange(cursorStart, cursorEnd);
             } catch {
-              // ignore for number inputs
+              // ignore
             }
           }
         }

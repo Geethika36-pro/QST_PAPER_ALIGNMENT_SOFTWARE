@@ -1,17 +1,26 @@
 <div class='q'>
-  <p><b>{{ row.no }}.</b> Match the following</p>
+  <p><b>{{ row.no }}.</b> {{ row.q.get('text') or 'Match the following' }}</p>
+  {% if row.q.get('figure') %}
+    {% set fig = row.q.get('figure') %}
+    {% include 'partials/_figure.html' %}
+  {% endif %}
   <table class='match'>
     <tr><th>Column A</th><th>Column B</th></tr>
     {% set colb = row.q.get('columnB', []) %}
+    {% set ns = namespace(row_count=0) %}
     {% for a in row.q.get('columnA', []) %}
-    <tr>
-      <td>{{ loop.index }}. {{ a }}</td>
-      <td>({{ 'abcdefgh'[loop.index0] }}) {{ colb[loop.index0] if loop.index0 < colb|length else '' }}</td>
-    </tr>
+      {% set b = colb[loop.index0] if loop.index0 < colb|length else '' %}
+      {% if (a and a|trim) or (b and b|trim) %}
+        {% set ns.row_count = ns.row_count + 1 %}
+        <tr>
+          <td>{{ ns.row_count }}. {{ a }}</td>
+          <td>({{ 'abcdefgh'[ns.row_count - 1] }}) {{ b }}</td>
+        </tr>
+      {% endif %}
     {% endfor %}
   </table>
   <div class='opts-grid'>
-    {% for o in row.q.get('options', []) %}
+    {% for o in row.q.get('options', []) if o and o|trim %}
     <span>{{ 'ABCD'[loop.index0] }}. {{ o }}</span>
     {% endfor %}
   </div>

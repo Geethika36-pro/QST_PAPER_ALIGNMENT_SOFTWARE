@@ -191,6 +191,7 @@ export class PreviewPaneComponent {
 
     if (
       event === 'header_change' ||
+      event === 'style_change' ||
       event === 'section_added' ||
       event === 'section_deleted' ||
       event === 'section_updated' ||

@@ -1,11 +1,24 @@
 /**
  * Frontend API Service Module
- * Handles communication with the FastAPI backend (/preview, /generate, /health)
+ * Handles communication with the FastAPI backend (/preview, /generate, /health, /options)
  * Includes debounce, cancellation of stale in-flight requests, and robust error handling.
  */
 
 let activeAbortController = null;
 let currentRequestId = 0;
+let cachedOptions = null;
+
+export const FALLBACK_OPTIONS = {
+  fonts: ['Times New Roman', 'Arial', 'Calibri', 'Cambria', 'Georgia', 'Verdana', 'Courier New'],
+  sizes: [9, 10, 10.5, 11, 12, 13, 14],
+  formats: ['pdf', 'docx'],
+  figure: {
+    maxBytes: 1572864,
+    maxCount: 12,
+    widths: [25, 40, 50, 65, 80, 100]
+  }
+};
+
 export const ApiService = {
   baseUrl: (() => {
     const saved = localStorage.getItem('qp_backend_url');
@@ -19,6 +32,7 @@ export const ApiService = {
   setBaseUrl(url) {
     this.baseUrl = url.trim().replace(/\/+$/, '');
     localStorage.setItem('qp_backend_url', this.baseUrl);
+    cachedOptions = null;
   },
 
   getBaseUrl() {
@@ -45,6 +59,30 @@ export const ApiService = {
     } catch (err) {
       return { isOnline: false, error: err.message };
     }
+  },
+
+  /**
+   * Fetches configurable options (fonts, sizes, formats, figure limits) from backend /options
+   * Falls back to built-in constants if offline.
+   */
+  async getOptions() {
+    if (cachedOptions) return cachedOptions;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch(`${this.baseUrl}/options`, {
+        method: 'GET',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        cachedOptions = await res.json();
+        return cachedOptions;
+      }
+    } catch {
+      // Fallback to built-in constants
+    }
+    return FALLBACK_OPTIONS;
   },
 
   /**
@@ -122,11 +160,17 @@ export const ApiService = {
   },
 
   /**
-   * Requests PDF binary from backend /generate and downloads it as exam_paper.pdf
+   * Requests document export (PDF or DOCX) from backend /generate?format=...
    */
-  async downloadPdf(paper) {
+  async downloadPaper(paper, format = 'pdf') {
+    const fmt = (format || 'pdf').toLowerCase();
+    const mimeTypes = {
+      pdf: 'application/pdf',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    };
+
     try {
-      const res = await fetch(`${this.baseUrl}/generate`, {
+      const res = await fetch(`${this.baseUrl}/generate?format=${encodeURIComponent(fmt)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -138,18 +182,24 @@ export const ApiService = {
         let errorMsg = `Server error (HTTP ${res.status})`;
         try {
           const json = await res.json();
-          if (json.error) errorMsg = json.error;
+          if (json.error) {
+            errorMsg = json.error;
+          } else if (json.detail) {
+            errorMsg = Array.isArray(json.detail)
+              ? json.detail.map(d => `${d.loc ? d.loc.join('.') : ''}: ${d.msg}`).join('\n')
+              : JSON.stringify(json.detail);
+          }
         } catch {
-          // ignore json parse error
+          // ignore
         }
         return { success: false, error: errorMsg };
       }
 
       const blob = await res.blob();
-      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-      
+      const exportBlob = new Blob([blob], { type: mimeTypes[fmt] || 'application/octet-stream' });
+
       // Determine filename from Content-Disposition header or paper metadata
-      let filename = 'exam_paper.pdf';
+      let filename = `exam_paper.${fmt}`;
       const disposition = res.headers.get('Content-Disposition');
       if (disposition && disposition.includes('filename=')) {
         const match = disposition.match(/filename=["']?([^"';]+)["']?/i);
@@ -162,10 +212,10 @@ export const ApiService = {
           .replace(/[^a-z0-9]+/g, '_')
           .replace(/^_+|_+$/g, '')
           .slice(0, 30) || 'exam_paper';
-        filename = `${schoolName}.pdf`;
+        filename = `${schoolName}.${fmt}`;
       }
 
-      const downloadUrl = window.URL.createObjectURL(pdfBlob);
+      const downloadUrl = window.URL.createObjectURL(exportBlob);
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = downloadUrl;
@@ -173,15 +223,21 @@ export const ApiService = {
       document.body.appendChild(a);
       a.click();
 
-      // Delay cleanup to allow browser to initiate system download to Downloads folder
       setTimeout(() => {
         window.URL.revokeObjectURL(downloadUrl);
         a.remove();
       }, 2000);
 
-      return { success: true, filename };
+      return { success: true, filename, format: fmt };
     } catch (err) {
       return { success: false, error: `Connection failed: ${err.message}` };
     }
+  },
+
+  /**
+   * Thin wrapper around downloadPaper for backwards compatibility
+   */
+  async downloadPdf(paper) {
+    return this.downloadPaper(paper, 'pdf');
   }
 };
