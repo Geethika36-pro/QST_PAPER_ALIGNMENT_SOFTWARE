@@ -19,10 +19,6 @@ const BASE_CSS = `@page {
   margin: 18mm 15mm;
   @bottom-center { content: 'Page ' counter(page) ' of ' counter(pages); font-size: 9pt; }
 }
-:root {
-  --paper-font: 'Times New Roman', serif;
-  --paper-size: 11pt;
-}
 body {
   font-family: var(--paper-font);
   font-size: var(--paper-size);
@@ -255,11 +251,11 @@ export function renderClientHtml(paper) {
 <head>
   <meta charset='utf-8'>
   <style>
+    ${BASE_CSS}
     :root {
       --paper-font: ${fontStack};
       --paper-size: ${fontSize}pt;
     }
-    ${BASE_CSS}
   </style>
 </head>
 <body>

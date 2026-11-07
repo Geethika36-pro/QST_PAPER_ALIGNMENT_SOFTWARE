@@ -3,11 +3,11 @@
 <head>
   <meta charset='utf-8'>
   <style>
+    {{ css|safe }}
     :root {
       --paper-font: {{ font_stack|safe }};
       --paper-size: {{ font_size }}pt;
     }
-    {{ css|safe }}
   </style>
 </head>
 <body>

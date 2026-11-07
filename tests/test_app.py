@@ -199,6 +199,9 @@ class IntegrationTests(unittest.TestCase):
             html = resp.read().decode('utf-8')
             self.assertIn('Georgia', html)
             self.assertIn('12pt', html)
+            # Ensure the custom style is not overridden by a subsequent default style
+            self.assertNotIn('Times New Roman', html.split('Georgia')[1])
+            self.assertNotIn('11pt', html.split('12pt')[1])
 
         # 2. PDF
         req = urllib.request.Request(
