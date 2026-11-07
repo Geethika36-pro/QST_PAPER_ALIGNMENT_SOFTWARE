@@ -46,28 +46,43 @@ export class DiagramDrawer {
     const overlay = document.createElement('div');
     overlay.className = 'diagram-drawer-backdrop';
     overlay.id = 'diagram-drawer-modal';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 12px;
+      box-sizing: border-box;
+    `;
 
     const chipsHtml = MATH_CHIPS.map(c => `
       <button type="button" class="diagram-chip-btn" data-char="${c}">${c}</button>
     `).join('');
 
     overlay.innerHTML = `
-      <div class="diagram-drawer-window">
-        <div class="diagram-drawer-header">
-          <div class="diagram-header-title">
-            <span style="font-size: 20px;">📐</span>
+      <div class="diagram-drawer-window" style="background: #ffffff; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid #cbd5e1; width: 100%; max-width: 760px; max-height: calc(100vh - 24px); display: flex; flex-direction: column; overflow: hidden;">
+        <div class="diagram-drawer-header" style="flex-shrink: 0; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; background: #f8fafc;">
+          <div class="diagram-header-title" style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">📐</span>
             <div>
-              <strong>Maths Diagram &amp; Geometry Drawer</strong>
-              <div class="diagram-header-sub">Sketch geometric figures, coordinate axes, angles, and add math labels</div>
+              <strong style="font-size: 14px;">Maths Diagram &amp; Geometry Drawer</strong>
+              <div class="diagram-header-sub" style="font-size: 11px; color: var(--color-text-muted);">Sketch geometric figures, coordinate axes, angles, and add math labels</div>
             </div>
           </div>
-          <button type="button" class="modal-close-btn" id="btn-close-drawer" aria-label="Close">&times;</button>
+          <button type="button" class="modal-close-btn" id="btn-close-drawer" aria-label="Close" style="font-size: 20px; cursor: pointer; border: none; background: none; color: #64748b;">&times;</button>
         </div>
 
-        <div class="diagram-toolbar">
+        <div class="diagram-toolbar" style="flex-shrink: 0; padding: 8px 12px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
           <!-- Tools Group -->
-          <div class="tool-group">
-            <span class="tool-group-label">Tools:</span>
+          <div class="tool-group" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+            <span class="tool-group-label" style="font-size: 11px; font-weight: 600; color: #64748b;">Tools:</span>
             <button type="button" class="btn-dtool active" data-tool="line" title="Straight Line">📏 Line</button>
             <button type="button" class="btn-dtool" data-tool="arrow" title="Arrow / Ray">↗ Arrow</button>
             <button type="button" class="btn-dtool" data-tool="axes" title="Coordinate Axes (X-Y plane with arrows & origin)">📈 X-Y Axes</button>
@@ -81,49 +96,43 @@ export class DiagramDrawer {
           </div>
 
           <!-- Styling Controls Group -->
-          <div class="tool-group">
-            <span class="tool-group-label">Style:</span>
-            <select id="select-dcolor" class="form-control form-control-sm" style="width: auto; height: 30px;" title="Stroke Color">
-              <option value="#000000">Black (Standard)</option>
+          <div class="tool-group" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto;">
+            <span class="tool-group-label" style="font-size: 11px; font-weight: 600; color: #64748b;">Style:</span>
+            <select id="select-dcolor" class="form-control form-control-sm" style="width: auto; height: 28px; padding: 2px 6px; font-size: 12px;" title="Stroke Color">
+              <option value="#000000">Black</option>
               <option value="#0044cc">Blue</option>
               <option value="#cc0000">Red</option>
               <option value="#008800">Green</option>
-              <option value="#555555">Dark Grey</option>
+              <option value="#555555">Grey</option>
             </select>
 
-            <select id="select-dwidth" class="form-control form-control-sm" style="width: auto; height: 30px;" title="Line Thickness">
+            <select id="select-dwidth" class="form-control form-control-sm" style="width: auto; height: 28px; padding: 2px 6px; font-size: 12px;" title="Line Thickness">
               <option value="1.5">Fine (1.5px)</option>
               <option value="2.5" selected>Medium (2.5px)</option>
               <option value="4">Bold (4.0px)</option>
             </select>
 
-            <label class="diagram-checkbox-label" title="Dashed style for construction lines, heights, medians">
+            <label class="diagram-checkbox-label" style="font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Dashed style for construction lines, heights, medians">
               <input type="checkbox" id="chk-dashed" /> Dashed
             </label>
-          </div>
 
-          <!-- Canvas & History Controls -->
-          <div class="tool-group">
-            <label class="diagram-checkbox-label" title="Show light background guide grid">
-              <input type="checkbox" id="chk-show-grid" checked /> Grid Guide
-            </label>
-            <label class="diagram-checkbox-label" title="Include grid in exported image (e.g. for graph paper questions)">
-              <input type="checkbox" id="chk-export-grid" /> Print Grid
+            <label class="diagram-checkbox-label" style="font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Show light background guide grid">
+              <input type="checkbox" id="chk-show-grid" checked /> Grid
             </label>
 
-            <div class="toolbar-divider" style="height: 24px; margin: 0 4px;"></div>
+            <div class="toolbar-divider" style="height: 20px; width: 1px; background: #cbd5e1; margin: 0 2px;"></div>
 
-            <button type="button" id="btn-dundo" class="btn btn-secondary btn-sm" title="Undo last action">↶ Undo</button>
-            <button type="button" id="btn-dclear" class="btn btn-secondary btn-sm" title="Clear canvas">🗑️ Clear</button>
+            <button type="button" id="btn-dundo" class="btn btn-secondary btn-sm" style="height: 28px; padding: 2px 8px; font-size: 12px;" title="Undo last action">↶ Undo</button>
+            <button type="button" id="btn-dclear" class="btn btn-secondary btn-sm" style="height: 28px; padding: 2px 8px; font-size: 12px;" title="Clear canvas">🗑️ Clear</button>
           </div>
         </div>
 
         <!-- Canvas Workspace Area -->
-        <div class="diagram-canvas-area" id="diagram-canvas-container">
-          <canvas id="diagram-main-canvas" width="680" height="420"></canvas>
+        <div class="diagram-canvas-area" id="diagram-canvas-container" style="flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; align-items: center; justify-content: center; background: #f1f5f9; padding: 6px; position: relative;">
+          <canvas id="diagram-main-canvas" width="600" height="230" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: crosshair;"></canvas>
 
           <!-- Floating Text Entry Box (Shown on Text tool click) -->
-          <div id="diagram-text-popover" class="diagram-text-popover" style="display: none;">
+          <div id="diagram-text-popover" class="diagram-text-popover" style="display: none; position: absolute; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); padding: 8px 10px; z-index: 100000; width: 260px;">
             <div style="font-size: 11px; font-weight: bold; margin-bottom: 4px; color: var(--color-text-muted);">
               Type Label or Click Math Symbol:
             </div>
@@ -138,13 +147,13 @@ export class DiagramDrawer {
           </div>
         </div>
 
-        <div class="diagram-drawer-footer">
+        <div class="diagram-drawer-footer" style="flex-shrink: 0; padding: 10px 16px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: space-between;">
           <div style="font-size: 12px; color: var(--color-text-muted);">
-            💡 <strong>Tip:</strong> Drag to draw shapes or coordinates. Click with the 🏷️ Text tool to label vertices ($A, B, C$) and angles.
+            💡 <strong>Tip:</strong> Drag to draw shapes or coordinates. Click with 🏷️ Text tool to label vertices ($A, B, C$).
           </div>
           <div style="display: flex; gap: 8px;">
-            <button type="button" id="btn-cancel-drawer" class="btn btn-secondary">Cancel</button>
-            <button type="button" id="btn-insert-diagram" class="btn btn-primary">✓ Insert Diagram into Question</button>
+            <button type="button" id="btn-cancel-drawer" class="btn btn-secondary" style="cursor: pointer;">Cancel</button>
+            <button type="button" id="btn-insert-diagram" class="btn btn-primary" style="cursor: pointer; font-weight: 600;">✓ Insert Diagram into Question</button>
           </div>
         </div>
       </div>
@@ -210,10 +219,13 @@ export class DiagramDrawer {
 
   bindDrawerEvents() {
     const overlay = this.modalEl;
+    if (!overlay) return;
 
     // Close / Cancel
-    overlay.querySelector('#btn-close-drawer').addEventListener('click', () => this.close());
-    overlay.querySelector('#btn-cancel-drawer').addEventListener('click', () => this.close());
+    const btnClose = overlay.querySelector('#btn-close-drawer');
+    if (btnClose) btnClose.addEventListener('click', () => this.close());
+    const btnCancel = overlay.querySelector('#btn-cancel-drawer');
+    if (btnCancel) btnCancel.addEventListener('click', () => this.close());
 
     // Tools switching
     overlay.querySelectorAll('.btn-dtool').forEach(btn => {
@@ -227,28 +239,34 @@ export class DiagramDrawer {
 
     // Style inputs
     const selColor = overlay.querySelector('#select-dcolor');
-    selColor.addEventListener('change', (e) => { this.strokeColor = e.target.value; });
+    if (selColor) selColor.addEventListener('change', (e) => { this.strokeColor = e.target.value; });
 
     const selWidth = overlay.querySelector('#select-dwidth');
-    selWidth.addEventListener('change', (e) => { this.lineWidth = Number(e.target.value); });
+    if (selWidth) selWidth.addEventListener('change', (e) => { this.lineWidth = Number(e.target.value); });
 
     const chkDashed = overlay.querySelector('#chk-dashed');
-    chkDashed.addEventListener('change', (e) => { this.isDashed = e.target.checked; });
+    if (chkDashed) chkDashed.addEventListener('change', (e) => { this.isDashed = e.target.checked; });
 
     const chkGrid = overlay.querySelector('#chk-show-grid');
-    chkGrid.addEventListener('change', (e) => {
-      this.showGrid = e.target.checked;
-      this.redrawCanvas();
-    });
+    if (chkGrid) {
+      chkGrid.addEventListener('change', (e) => {
+        this.showGrid = e.target.checked;
+        this.redrawCanvas();
+      });
+    }
 
     const chkExpGrid = overlay.querySelector('#chk-export-grid');
-    chkExpGrid.addEventListener('change', (e) => {
-      this.includeGridInExport = e.target.checked;
-    });
+    if (chkExpGrid) {
+      chkExpGrid.addEventListener('change', (e) => {
+        this.includeGridInExport = e.target.checked;
+      });
+    }
 
     // Undo / Clear
-    overlay.querySelector('#btn-dundo').addEventListener('click', () => this.undo());
-    overlay.querySelector('#btn-dclear').addEventListener('click', () => this.clearCanvas());
+    const btnUndo = overlay.querySelector('#btn-dundo');
+    if (btnUndo) btnUndo.addEventListener('click', () => this.undo());
+    const btnClear = overlay.querySelector('#btn-dclear');
+    if (btnClear) btnClear.addEventListener('click', () => this.clearCanvas());
 
     // Text popover controls
     const textPopover = overlay.querySelector('#diagram-text-popover');
@@ -258,31 +276,40 @@ export class DiagramDrawer {
 
     overlay.querySelectorAll('.diagram-chip-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        textInput.value += btn.dataset.char;
-        textInput.focus();
+        if (textInput) {
+          textInput.value += btn.dataset.char;
+          textInput.focus();
+        }
       });
     });
 
-    btnApplyText.addEventListener('click', () => this.applyText());
-    textInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') this.applyText();
-      if (e.key === 'Escape') this.hideTextPopover();
-    });
-    btnCancelText.addEventListener('click', () => this.hideTextPopover());
+    if (btnApplyText) btnApplyText.addEventListener('click', () => this.applyText());
+    if (textInput) {
+      textInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') this.applyText();
+        if (e.key === 'Escape') this.hideTextPopover();
+      });
+    }
+    if (btnCancelText) btnCancelText.addEventListener('click', () => this.hideTextPopover());
 
     // Insert Diagram into Question
-    overlay.querySelector('#btn-insert-diagram').addEventListener('click', () => {
-      const dataUrl = this.exportToPng();
-      if (this.onSaveCallback) {
-        this.onSaveCallback(dataUrl);
-      }
-      this.close();
-    });
+    const btnInsert = overlay.querySelector('#btn-insert-diagram');
+    if (btnInsert) {
+      btnInsert.addEventListener('click', () => {
+        const dataUrl = this.exportToPng();
+        if (this.onSaveCallback) {
+          this.onSaveCallback(dataUrl);
+        }
+        this.close();
+      });
+    }
 
     // Canvas Pointer Events
-    this.canvas.addEventListener('mousedown', (e) => this.onPointerDown(e));
-    this.canvas.addEventListener('mousemove', (e) => this.onPointerMove(e));
-    window.addEventListener('mouseup', (e) => this.onPointerUp(e));
+    if (this.canvas) {
+      this.canvas.addEventListener('mousedown', (e) => this.onPointerDown(e));
+      this.canvas.addEventListener('mousemove', (e) => this.onPointerMove(e));
+      window.addEventListener('mouseup', (e) => this.onPointerUp(e));
+    }
   }
 
   getCanvasCoords(e) {
@@ -632,3 +659,4 @@ export class DiagramDrawer {
     }
   }
 }
+

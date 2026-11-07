@@ -581,35 +581,21 @@ export class QuestionFormComponent {
     } else {
       figContainer.innerHTML = `
         <div class="figure-editor-box">
-          <div class="figure-editor-header">
-            <div class="figure-editor-title">
+          <div class="figure-editor-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="figure-editor-title" style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
               <span>📐</span>
               <span>Question Diagram / Figure (Optional)</span>
             </div>
-            <button type="button" id="btn-open-draw-modal" class="btn btn-primary btn-sm">
+            <button type="button" id="btn-open-draw-modal" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer;">
               ✏️ Draw Maths Diagram
             </button>
           </div>
 
-          <div class="figure-options-strip">
-            <div id="figure-dropzone" class="figure-dropzone" title="Click to browse image or drag and drop">
-              <div style="font-size: 20px; margin-bottom: 4px;">📁 📷</div>
-              <div><strong>Insert Existing Diagram</strong></div>
-              <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">
-                Drop PNG/JPEG here, Ctrl+V, or <span style="color: var(--color-primary-600); text-decoration: underline;">browse file</span>
-              </div>
-              <input type="file" id="input-figure-file" accept="image/png,image/jpeg" style="display: none;" />
-            </div>
-
-            <div class="figure-or-divider">OR</div>
-
-            <button type="button" id="btn-draw-diagram-action" class="btn-draw-diagram-card" title="Open geometric sketcher">
-              <div style="font-size: 22px; margin-bottom: 4px;">📐 ✏️</div>
-              <strong>Draw Maths Diagram</strong>
-              <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
-                Geometry, Triangles, Circles, Coordinates &amp; Labels
-              </div>
-            </button>
+          <div id="figure-dropzone" class="figure-dropzone" style="margin-top: 10px;" title="Click to browse image or drag and drop">
+            <div style="font-size: 20px; margin-bottom: 4px;">📁 📷</div>
+            <div><strong>Drop PNG or JPEG image here</strong>, paste with <strong>Ctrl+V</strong>, or <span style="color: var(--color-primary-600); text-decoration: underline;">browse file</span></div>
+            <div style="font-size: 11px; color: var(--color-text-dim); margin-top: 4px;">Max decoded size: 1.5 MB (auto-scaled to max 1200px width)</div>
+            <input type="file" id="input-figure-file" accept="image/png,image/jpeg" style="display: none;" />
           </div>
 
           <div id="figure-error-msg" style="display: none; margin-top: 8px; color: var(--color-danger-text); font-size: 12px;"></div>
@@ -617,7 +603,10 @@ export class QuestionFormComponent {
       `;
 
       const openDraw = (e) => {
-        if (e) e.preventDefault();
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         this.diagramDrawer.open({
           initialImageSrc: null,
           onSave: (dataUrl) => {
@@ -634,8 +623,6 @@ export class QuestionFormComponent {
 
       const btnDrawTop = figContainer.querySelector('#btn-open-draw-modal');
       if (btnDrawTop) btnDrawTop.addEventListener('click', openDraw);
-      const btnDrawCard = figContainer.querySelector('#btn-draw-diagram-action');
-      if (btnDrawCard) btnDrawCard.addEventListener('click', openDraw);
 
       const dropzone = figContainer.querySelector('#figure-dropzone');
       const fileInput = figContainer.querySelector('#input-figure-file');
