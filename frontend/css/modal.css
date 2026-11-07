@@ -252,6 +252,23 @@
   font-weight: 600;
 }
 
+.btn-dtool.btn-dtool-erase {
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.btn-dtool.btn-dtool-erase:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.btn-dtool.btn-dtool-erase.active {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #b91c1c;
+  font-weight: 600;
+}
+
 .diagram-checkbox-label {
   font-size: 12px;
   display: flex;

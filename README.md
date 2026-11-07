@@ -39,8 +39,10 @@ A comprehensive, production-ready educational examination paper alignment and fo
 
 6. **Maths Diagram Drawing & Figure Insertion**:
    - **Insert Diagram**: Drag-and-drop, Ctrl+V clipboard paste, or file browser for PNG/JPEG diagrams.
-   - **Draw Maths Diagram**: Built-in interactive geometry sketcher with straight lines, arrows, coordinate axes (X-Y plane), right/general triangles, circles, rectangles, angle arcs, dashed construction lines, text/math labels, and math symbol quick-chips.
-   - **Edit / Redraw**: Reopen existing drawings directly on the canvas to refine diagrams.
+   - **Draw Maths Diagram**: Built-in interactive geometry sketcher with straight lines, arrows, coordinate axes (X-Y plane), right/general triangles, circles, rectangles, angle arcs, dashed construction lines, freehand pen, text/math labels, and math symbol quick-chips.
+   - **Erase Options**: **🧽 Brush Eraser** (with adjustable Fine, Medium, Large, X-Large size) to erase specific lines or image details, and **✂️ Box Erase** to drag a selection rectangle and immediately remove a specific image, shape, or diagram region.
+   - **Canvas Image Import**: Insert or paste (`Ctrl+V`) reference images directly onto the canvas, edit or erase specific areas, and insert the result into the question.
+   - **Edit / Redraw**: Reopen existing drawings directly on the canvas to refine diagrams or erase unwanted parts.
 
 7. **Page Style & Live Typography Preview**:
    - Instant preview customization for Font Families (Times New Roman, Arial, Calibri, Cambria, Georgia, Verdana, Courier New) and Base Font Sizes (9pt to 14pt).

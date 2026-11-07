@@ -14,6 +14,7 @@ export class DiagramDrawer {
     this.activeTool = 'line';
     this.strokeColor = '#000000';
     this.lineWidth = 2;
+    this.eraserSize = 20;
     this.isDashed = false;
     this.showGrid = true;
     this.includeGridInExport = false;
@@ -30,6 +31,9 @@ export class DiagramDrawer {
 
     // Pending text placement
     this.textPos = null;
+
+    // Clipboard paste handler
+    this.pasteHandler = null;
   }
 
   /**
@@ -67,13 +71,13 @@ export class DiagramDrawer {
     `).join('');
 
     overlay.innerHTML = `
-      <div class="diagram-drawer-window" style="background: #ffffff; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid #cbd5e1; width: 100%; max-width: 760px; max-height: calc(100vh - 24px); display: flex; flex-direction: column; overflow: hidden;">
+      <div class="diagram-drawer-window" style="background: #ffffff; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid #cbd5e1; width: 100%; max-width: 840px; max-height: calc(100vh - 24px); display: flex; flex-direction: column; overflow: hidden;">
         <div class="diagram-drawer-header" style="flex-shrink: 0; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; background: #f8fafc;">
           <div class="diagram-header-title" style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 18px;">📐</span>
             <div>
               <strong style="font-size: 14px;">Maths Diagram &amp; Geometry Drawer</strong>
-              <div class="diagram-header-sub" style="font-size: 11px; color: var(--color-text-muted);">Sketch geometric figures, coordinate axes, angles, and add math labels</div>
+              <div class="diagram-header-sub" style="font-size: 11px; color: var(--color-text-muted);">Sketch geometric figures, coordinate axes, angles, math labels, or erase/edit images</div>
             </div>
           </div>
           <button type="button" class="modal-close-btn" id="btn-close-drawer" aria-label="Close" style="font-size: 20px; cursor: pointer; border: none; background: none; color: #64748b;">&times;</button>
@@ -92,29 +96,44 @@ export class DiagramDrawer {
             <button type="button" class="btn-dtool" data-tool="rect" title="Rectangle / Square">▭ Rectangle</button>
             <button type="button" class="btn-dtool" data-tool="arc" title="Angle Arc">⌒ Arc</button>
             <button type="button" class="btn-dtool" data-tool="pen" title="Freehand Pen / Curve">✏️ Pen</button>
-            <button type="button" class="btn-dtool" data-tool="text" title="Click on canvas to place text/labels">🏷️ Text / Label</button>
+            <button type="button" class="btn-dtool" data-tool="text" title="Click on canvas to place text/labels">🏷️ Text</button>
+            <button type="button" class="btn-dtool btn-dtool-erase" data-tool="eraser" title="Erase strokes or parts of image (drag brush to erase)">🧽 Eraser</button>
+            <button type="button" class="btn-dtool btn-dtool-erase" data-tool="erase_box" title="Erase specific image or area (drag rectangle to remove)">✂️ Erase Area</button>
           </div>
 
           <!-- Styling Controls Group -->
           <div class="tool-group" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto;">
-            <span class="tool-group-label" style="font-size: 11px; font-weight: 600; color: #64748b;">Style:</span>
-            <select id="select-dcolor" class="form-control form-control-sm" style="width: auto; height: 28px; padding: 2px 6px; font-size: 12px;" title="Stroke Color">
-              <option value="#000000">Black</option>
-              <option value="#0044cc">Blue</option>
-              <option value="#cc0000">Red</option>
-              <option value="#008800">Green</option>
-              <option value="#555555">Grey</option>
-            </select>
+            <div id="draw-style-controls" style="display: flex; align-items: center; gap: 6px;">
+              <span class="tool-group-label" style="font-size: 11px; font-weight: 600; color: #64748b;">Style:</span>
+              <select id="select-dcolor" class="form-control form-control-sm" style="width: auto; height: 28px; padding: 2px 6px; font-size: 12px;" title="Stroke Color">
+                <option value="#000000">Black</option>
+                <option value="#0044cc">Blue</option>
+                <option value="#cc0000">Red</option>
+                <option value="#008800">Green</option>
+                <option value="#555555">Grey</option>
+              </select>
 
-            <select id="select-dwidth" class="form-control form-control-sm" style="width: auto; height: 28px; padding: 2px 6px; font-size: 12px;" title="Line Thickness">
-              <option value="1.5">Fine (1.5px)</option>
-              <option value="2.5" selected>Medium (2.5px)</option>
-              <option value="4">Bold (4.0px)</option>
-            </select>
+              <select id="select-dwidth" class="form-control form-control-sm" style="width: auto; height: 28px; padding: 2px 6px; font-size: 12px;" title="Line Thickness">
+                <option value="1.5">Fine (1.5px)</option>
+                <option value="2.5" selected>Medium (2.5px)</option>
+                <option value="4">Bold (4.0px)</option>
+              </select>
 
-            <label class="diagram-checkbox-label" style="font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Dashed style for construction lines, heights, medians">
-              <input type="checkbox" id="chk-dashed" /> Dashed
-            </label>
+              <label class="diagram-checkbox-label" style="font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Dashed style for construction lines, heights, medians">
+                <input type="checkbox" id="chk-dashed" /> Dashed
+              </label>
+            </div>
+
+            <div id="erase-style-controls" style="display: none; align-items: center; gap: 6px;">
+              <span class="tool-group-label" style="font-size: 11px; font-weight: 600; color: #dc2626;">Eraser:</span>
+              <select id="select-eraser-size" class="form-control form-control-sm" style="width: auto; height: 28px; padding: 2px 6px; font-size: 12px;" title="Eraser Brush Size">
+                <option value="10">Fine (10px)</option>
+                <option value="20" selected>Medium (20px)</option>
+                <option value="35">Large (35px)</option>
+                <option value="50">X-Large (50px)</option>
+              </select>
+              <span id="erase-box-hint" style="display: none; font-size: 11px; color: #dc2626; font-weight: 500;">Drag rectangle over area/image to erase</span>
+            </div>
 
             <label class="diagram-checkbox-label" style="font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Show light background guide grid">
               <input type="checkbox" id="chk-show-grid" checked /> Grid
@@ -123,7 +142,9 @@ export class DiagramDrawer {
             <div class="toolbar-divider" style="height: 20px; width: 1px; background: #cbd5e1; margin: 0 2px;"></div>
 
             <button type="button" id="btn-dundo" class="btn btn-secondary btn-sm" style="height: 28px; padding: 2px 8px; font-size: 12px;" title="Undo last action">↶ Undo</button>
-            <button type="button" id="btn-dclear" class="btn btn-secondary btn-sm" style="height: 28px; padding: 2px 8px; font-size: 12px;" title="Clear canvas">🗑️ Clear</button>
+            <button type="button" id="btn-dimport-img" class="btn btn-secondary btn-sm" style="height: 28px; padding: 2px 8px; font-size: 12px;" title="Insert or paste an image onto the canvas">🖼️ Insert Image</button>
+            <input type="file" id="input-dimport-file" accept="image/png,image/jpeg" style="display: none;" />
+            <button type="button" id="btn-dclear" class="btn btn-secondary btn-sm" style="height: 28px; padding: 2px 8px; font-size: 12px;" title="Clear entire canvas">🗑️ Clear All</button>
           </div>
         </div>
 
@@ -149,7 +170,7 @@ export class DiagramDrawer {
 
         <div class="diagram-drawer-footer" style="flex-shrink: 0; padding: 10px 16px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: space-between;">
           <div style="font-size: 12px; color: var(--color-text-muted);">
-            💡 <strong>Tip:</strong> Drag to draw shapes or coordinates. Click with 🏷️ Text tool to label vertices ($A, B, C$).
+            💡 <strong>Tip:</strong> Drag to draw shapes or coordinates. Use <strong>🧽 Eraser</strong> or <strong>✂️ Erase Area</strong> to remove strokes or specific images.
           </div>
           <div style="display: flex; gap: 8px;">
             <button type="button" id="btn-cancel-drawer" class="btn btn-secondary" style="cursor: pointer;">Cancel</button>
@@ -174,23 +195,27 @@ export class DiagramDrawer {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     if (initialImageSrc) {
-      const img = new Image();
-      img.onload = () => {
-        // Draw centered
-        const scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height, 1);
-        const w = img.width * scale;
-        const h = img.height * scale;
-        const x = (this.canvas.width - w) / 2;
-        const y = (this.canvas.height - h) / 2;
-        this.ctx.drawImage(img, x, y, w, h);
-        this.saveState();
-        this.redrawCanvas();
-      };
-      img.src = initialImageSrc;
+      this.drawImageOnCanvas(initialImageSrc);
     } else {
       this.saveState();
       this.redrawCanvas();
     }
+  }
+
+  drawImageOnCanvas(src) {
+    const img = new Image();
+    img.onload = () => {
+      // Draw centered
+      const scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height, 1);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      const x = (this.canvas.width - w) / 2;
+      const y = (this.canvas.height - h) / 2;
+      this.ctx.drawImage(img, x, y, w, h);
+      this.saveState();
+      this.redrawCanvas();
+    };
+    img.src = src;
   }
 
   saveState() {
@@ -234,6 +259,8 @@ export class DiagramDrawer {
         btn.classList.add('active');
         this.activeTool = btn.dataset.tool;
         this.hideTextPopover();
+        this.updateCanvasCursor();
+        this.updateToolbarStyleMode();
       });
     });
 
@@ -243,6 +270,13 @@ export class DiagramDrawer {
 
     const selWidth = overlay.querySelector('#select-dwidth');
     if (selWidth) selWidth.addEventListener('change', (e) => { this.lineWidth = Number(e.target.value); });
+
+    const selEraserSize = overlay.querySelector('#select-eraser-size');
+    if (selEraserSize) {
+      selEraserSize.addEventListener('change', (e) => {
+        this.eraserSize = Number(e.target.value);
+      });
+    }
 
     const chkDashed = overlay.querySelector('#chk-dashed');
     if (chkDashed) chkDashed.addEventListener('change', (e) => { this.isDashed = e.target.checked; });
@@ -267,6 +301,44 @@ export class DiagramDrawer {
     if (btnUndo) btnUndo.addEventListener('click', () => this.undo());
     const btnClear = overlay.querySelector('#btn-dclear');
     if (btnClear) btnClear.addEventListener('click', () => this.clearCanvas());
+
+    // Import Image button and file input
+    const btnImportImg = overlay.querySelector('#btn-dimport-img');
+    const inputImportFile = overlay.querySelector('#input-dimport-file');
+    if (btnImportImg && inputImportFile) {
+      btnImportImg.addEventListener('click', () => inputImportFile.click());
+      inputImportFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            this.drawImageOnCanvas(evt.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+        inputImportFile.value = '';
+      });
+    }
+
+    // Clipboard Paste Listener (Ctrl+V into canvas)
+    this.pasteHandler = (e) => {
+      if (!this.modalEl) return;
+      const items = (e.clipboardData || window.clipboardData)?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const blob = item.getAsFile();
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            this.drawImageOnCanvas(evt.target.result);
+          };
+          reader.readAsDataURL(blob);
+          break;
+        }
+      }
+    };
+    window.addEventListener('paste', this.pasteHandler);
 
     // Text popover controls
     const textPopover = overlay.querySelector('#diagram-text-popover');
@@ -312,6 +384,43 @@ export class DiagramDrawer {
     }
   }
 
+  updateCanvasCursor() {
+    if (!this.canvas) return;
+    if (this.activeTool === 'eraser') {
+      this.canvas.style.cursor = 'cell';
+    } else if (this.activeTool === 'erase_box') {
+      this.canvas.style.cursor = 'crosshair';
+    } else if (this.activeTool === 'text') {
+      this.canvas.style.cursor = 'text';
+    } else {
+      this.canvas.style.cursor = 'crosshair';
+    }
+  }
+
+  updateToolbarStyleMode() {
+    const overlay = this.modalEl;
+    if (!overlay) return;
+    const drawStyles = overlay.querySelector('#draw-style-controls');
+    const eraseStyles = overlay.querySelector('#erase-style-controls');
+    const eraseHint = overlay.querySelector('#erase-box-hint');
+    const selectEraserSize = overlay.querySelector('#select-eraser-size');
+
+    if (this.activeTool === 'eraser') {
+      if (drawStyles) drawStyles.style.display = 'none';
+      if (eraseStyles) eraseStyles.style.display = 'flex';
+      if (selectEraserSize) selectEraserSize.style.display = 'inline-block';
+      if (eraseHint) eraseHint.style.display = 'none';
+    } else if (this.activeTool === 'erase_box') {
+      if (drawStyles) drawStyles.style.display = 'none';
+      if (eraseStyles) eraseStyles.style.display = 'flex';
+      if (selectEraserSize) selectEraserSize.style.display = 'none';
+      if (eraseHint) eraseHint.style.display = 'inline-block';
+    } else {
+      if (drawStyles) drawStyles.style.display = 'flex';
+      if (eraseStyles) eraseStyles.style.display = 'none';
+    }
+  }
+
   getCanvasCoords(e) {
     const rect = this.canvas.getBoundingClientRect();
     const scaleX = this.canvas.width / rect.width;
@@ -336,6 +445,9 @@ export class DiagramDrawer {
 
     if (this.activeTool === 'pen') {
       this.freehandPoints = [coords];
+    } else if (this.activeTool === 'eraser') {
+      this.freehandPoints = [coords];
+      this.eraseAtPoint(coords.x, coords.y);
     }
   }
 
@@ -346,6 +458,18 @@ export class DiagramDrawer {
     if (this.activeTool === 'pen') {
       this.freehandPoints.push(coords);
       this.drawFreehandSegment();
+      return;
+    }
+
+    if (this.activeTool === 'eraser') {
+      this.freehandPoints.push(coords);
+      this.eraseFreehandSegment();
+      return;
+    }
+
+    if (this.activeTool === 'erase_box') {
+      this.restoreSnapshot();
+      this.drawEraseBoxPreview(this.startX, this.startY, coords.x, coords.y);
       return;
     }
 
@@ -366,11 +490,86 @@ export class DiagramDrawer {
       return;
     }
 
+    if (this.activeTool === 'eraser') {
+      this.saveState();
+      this.redrawCanvas();
+      this.freehandPoints = [];
+      return;
+    }
+
+    if (this.activeTool === 'erase_box') {
+      this.restoreSnapshot();
+      const rx = Math.min(this.startX, coords.x);
+      const ry = Math.min(this.startY, coords.y);
+      const rw = Math.abs(coords.x - this.startX);
+      const rh = Math.abs(coords.y - this.startY);
+      if (rw > 3 && rh > 3) {
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(rx, ry, rw, rh);
+        this.saveState();
+        this.redrawCanvas();
+      }
+      return;
+    }
+
     // Finalize shape
     this.restoreSnapshot();
     this.drawFinalShape(this.startX, this.startY, coords.x, coords.y);
     this.saveState();
     this.redrawCanvas();
+  }
+
+  eraseAtPoint(x, y) {
+    this.ctx.save();
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, this.eraserSize / 2, 0, Math.PI * 2);
+    this.ctx.fill();
+    this.ctx.restore();
+  }
+
+  eraseFreehandSegment() {
+    const pts = this.freehandPoints;
+    if (pts.length < 2) return;
+    this.ctx.save();
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.lineWidth = this.eraserSize;
+    this.ctx.lineCap = 'round';
+    this.ctx.lineJoin = 'round';
+    this.ctx.beginPath();
+    const p1 = pts[pts.length - 2];
+    const p2 = pts[pts.length - 1];
+    this.ctx.moveTo(p1.x, p1.y);
+    this.ctx.lineTo(p2.x, p2.y);
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
+  drawEraseBoxPreview(x1, y1, x2, y2) {
+    this.ctx.save();
+    const rx = Math.min(x1, x2);
+    const ry = Math.min(y1, y2);
+    const rw = Math.abs(x2 - x1);
+    const rh = Math.abs(y2 - y1);
+
+    // Red tint overlay indicating region to be erased
+    this.ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+    this.ctx.fillRect(rx, ry, rw, rh);
+
+    this.ctx.strokeStyle = '#dc2626';
+    this.ctx.lineWidth = 1.5;
+    this.ctx.setLineDash([5, 4]);
+    this.ctx.strokeRect(rx, ry, rw, rh);
+
+    // Small badge label if box is large enough
+    if (rw > 70 && rh > 26) {
+      this.ctx.fillStyle = 'rgba(220, 38, 38, 0.9)';
+      this.ctx.fillRect(rx + 4, ry + 4, 82, 18);
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.font = 'bold 10px sans-serif';
+      this.ctx.fillText('✂️ Erase Area', rx + 8, ry + 16);
+    }
+    this.ctx.restore();
   }
 
   restoreSnapshot() {
@@ -651,6 +850,10 @@ export class DiagramDrawer {
   }
 
   close() {
+    if (this.pasteHandler) {
+      window.removeEventListener('paste', this.pasteHandler);
+      this.pasteHandler = null;
+    }
     if (this.modalEl) {
       this.modalEl.remove();
       this.modalEl = null;
