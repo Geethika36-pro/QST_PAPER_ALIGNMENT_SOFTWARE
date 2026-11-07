@@ -4,4 +4,7 @@
     {% set fig = row.q.get('figure') %}
     {% include 'partials/_figure.html' %}
   {% endif %}
+  {% for sq in row.q.get('subQuestions', []) if sq.get('text') and sq.get('text')|trim %}
+  <p class='sub'>{{ loop.index }}. {{ sq.get('text', '') }}{% if sq.get('marks') is not none and sq.get('marks') != '' %} <span class='subm'>({{ sq.get('marks') }})</span>{% endif %}</p>
+  {% endfor %}
 </div>

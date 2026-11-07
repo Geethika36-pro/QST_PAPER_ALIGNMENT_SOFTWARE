@@ -8,6 +8,7 @@
 import { store } from '../state.js';
 import { validateQuestion } from '../validator.js';
 import { ModalService } from './modal.js';
+import { DiagramDrawer } from './diagramDrawer.js';
 
 const MATH_SYMBOLS = [
   'x²', 'x³', '√', 'π', '°', '∠', '△', '≤', '≥', '≠', '±', '×', '÷', '½', '∴', 'θ'
@@ -29,6 +30,7 @@ export class QuestionFormComponent {
     this.currentData = null;
     this.lastFocusedInput = null;
     this.pasteListener = null;
+    this.diagramDrawer = new DiagramDrawer();
 
     store.subscribe((event, state, payload) => {
       if (event === 'open_question_modal') {
@@ -146,6 +148,9 @@ export class QuestionFormComponent {
   }
 
   close() {
+    if (this.diagramDrawer) {
+      this.diagramDrawer.close();
+    }
     if (this.pasteListener) {
       window.removeEventListener('paste', this.pasteListener);
       this.pasteListener = null;
@@ -355,11 +360,56 @@ export class QuestionFormComponent {
       `;
     } else if (type === 'short' || type === 'long') {
       const isLong = type === 'long';
+      const hasSubs = Array.isArray(q.subQuestions) && q.subQuestions.length > 0;
+      let subSectionHtml = '';
+
+      if (hasSubs) {
+        const subHtml = q.subQuestions.map((sq, idx) => `
+          <div class="dynamic-row" data-index="${idx}">
+            <span class="dynamic-row-num">(${String.fromCharCode(97 + (idx % 26))})</span>
+            <input type="text" class="form-control sq-text-input" value="${escapeHtml(sq.text || '')}" placeholder="Sub-question (${String.fromCharCode(97 + (idx % 26))}) text..." />
+            <div class="marks-input-wrapper">
+              <input type="number" class="form-control form-control-sm sq-marks-input" value="${sq.marks ?? ''}" min="1" max="50" placeholder="Marks" title="Marks (Optional)" />
+            </div>
+            <button type="button" class="btn btn-danger btn-sm btn-remove-sq" data-index="${idx}" title="Remove sub-question">✕</button>
+          </div>
+        `).join('');
+
+        subSectionHtml = `
+          <div class="sub-box" style="margin-top: 14px;">
+            <div class="sub-box-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Sub-questions (Optional)</span>
+              <button type="button" id="btn-clear-subquestions" class="btn btn-secondary btn-sm" style="color: var(--color-danger-solid); font-size: 11px;">
+                ✕ Remove All Sub-questions
+              </button>
+            </div>
+            <div class="dynamic-list" id="subquestions-list">
+              ${subHtml}
+            </div>
+            <button type="button" id="btn-add-subquestion" class="btn btn-secondary btn-sm" style="margin-top: 8px;">
+              ➕ Add Another Sub-question
+            </button>
+          </div>
+        `;
+      } else {
+        subSectionHtml = `
+          <div style="margin-top: 10px;">
+            <button type="button" id="btn-enable-subquestions" class="btn btn-secondary btn-sm">
+              ➕ Add Sub-questions (Optional)
+            </button>
+            <span style="font-size: 12px; color: var(--color-text-muted); margin-left: 8px;">
+              Click if this question has multiple sub-parts (e.g. a, b).
+            </span>
+          </div>
+        `;
+      }
+
       html = `
         <div class="form-group">
           <label class="form-label form-label-required" for="input-question-text">${isLong ? 'Long Answer' : 'Short Answer'} Question Text</label>
-          <textarea id="input-question-text" class="form-control" rows="${isLong ? 4 : 2}" placeholder="Enter examination question text here...">${escapeHtml(q.text || '')}</textarea>
+          <textarea id="input-question-text" class="form-control" rows="${isLong ? 3 : 2}" placeholder="Enter examination question text here...">${escapeHtml(q.text || '')}</textarea>
         </div>
+        ${subSectionHtml}
       `;
     } else if (type === 'passage') {
       const subQuestions = q.subQuestions || [{ text: '', marks: 2 }];
@@ -438,12 +488,17 @@ export class QuestionFormComponent {
         <div class="figure-editor-box">
           <div class="figure-editor-header">
             <div class="figure-editor-title">
-              <span>🖼️</span>
-              <span>Question Figure (Image)</span>
+              <span>📐</span>
+              <span>Question Diagram / Figure (Image)</span>
             </div>
-            <button type="button" id="btn-remove-figure" class="btn btn-danger btn-sm" title="Remove figure from question">
-              🗑️ Remove Figure
-            </button>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" id="btn-edit-figure-drawing" class="btn btn-secondary btn-sm" title="Reopen and edit diagram in canvas">
+                ✏️ Edit / Redraw in Canvas
+              </button>
+              <button type="button" id="btn-remove-figure" class="btn btn-danger btn-sm" title="Remove figure from question">
+                🗑️ Remove Figure
+              </button>
+            </div>
           </div>
 
           <div class="figure-preview-layout">
@@ -469,12 +524,25 @@ export class QuestionFormComponent {
 
               <div class="form-group field-full">
                 <label class="form-label" for="input-fig-caption">Caption (Optional, max 120 chars)</label>
-                <input type="text" id="input-fig-caption" class="form-control form-control-sm" maxlength="120" placeholder="e.g. Fig. 1: Map of ancient trade routes" value="${escapeHtml(fig.caption || '')}" />
+                <input type="text" id="input-fig-caption" class="form-control form-control-sm" maxlength="120" placeholder="e.g. Fig. 1: Triangle ABC with right angle at B" value="${escapeHtml(fig.caption || '')}" />
               </div>
             </div>
           </div>
         </div>
       `;
+
+      const btnEdit = figContainer.querySelector('#btn-edit-figure-drawing');
+      if (btnEdit) {
+        btnEdit.addEventListener('click', () => {
+          this.diagramDrawer.open({
+            initialImageSrc: this.currentData.figure.src,
+            onSave: (dataUrl) => {
+              this.currentData.figure.src = dataUrl;
+              this.renderFigureBox();
+            }
+          });
+        });
+      }
 
       const btnRemove = figContainer.querySelector('#btn-remove-figure');
       if (btnRemove) {
@@ -515,19 +583,59 @@ export class QuestionFormComponent {
         <div class="figure-editor-box">
           <div class="figure-editor-header">
             <div class="figure-editor-title">
-              <span>🖼️</span>
-              <span>Question Figure (Optional)</span>
+              <span>📐</span>
+              <span>Question Diagram / Figure (Optional)</span>
             </div>
+            <button type="button" id="btn-open-draw-modal" class="btn btn-primary btn-sm">
+              ✏️ Draw Maths Diagram
+            </button>
           </div>
-          <div id="figure-dropzone" class="figure-dropzone">
-            <div style="font-size: 20px; margin-bottom: 4px;">📷</div>
-            <div><strong>Drop PNG or JPEG image here</strong>, paste with <strong>Ctrl+V</strong>, or <span style="color: var(--color-primary-600); text-decoration: underline;">browse file</span></div>
-            <div style="font-size: 11px; color: var(--color-text-dim); margin-top: 4px;">Max decoded size: 1.5 MB (auto-scaled to max 1200px width)</div>
-            <input type="file" id="input-figure-file" accept="image/png,image/jpeg" style="display: none;" />
+
+          <div class="figure-options-strip">
+            <div id="figure-dropzone" class="figure-dropzone" title="Click to browse image or drag and drop">
+              <div style="font-size: 20px; margin-bottom: 4px;">📁 📷</div>
+              <div><strong>Insert Existing Diagram</strong></div>
+              <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">
+                Drop PNG/JPEG here, Ctrl+V, or <span style="color: var(--color-primary-600); text-decoration: underline;">browse file</span>
+              </div>
+              <input type="file" id="input-figure-file" accept="image/png,image/jpeg" style="display: none;" />
+            </div>
+
+            <div class="figure-or-divider">OR</div>
+
+            <button type="button" id="btn-draw-diagram-action" class="btn-draw-diagram-card" title="Open geometric sketcher">
+              <div style="font-size: 22px; margin-bottom: 4px;">📐 ✏️</div>
+              <strong>Draw Maths Diagram</strong>
+              <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+                Geometry, Triangles, Circles, Coordinates &amp; Labels
+              </div>
+            </button>
           </div>
+
           <div id="figure-error-msg" style="display: none; margin-top: 8px; color: var(--color-danger-text); font-size: 12px;"></div>
         </div>
       `;
+
+      const openDraw = (e) => {
+        if (e) e.preventDefault();
+        this.diagramDrawer.open({
+          initialImageSrc: null,
+          onSave: (dataUrl) => {
+            this.currentData.figure = {
+              src: dataUrl,
+              widthPct: this.currentData.figure?.widthPct || 50,
+              align: this.currentData.figure?.align || 'center',
+              caption: this.currentData.figure?.caption || ''
+            };
+            this.renderFigureBox();
+          }
+        });
+      };
+
+      const btnDrawTop = figContainer.querySelector('#btn-open-draw-modal');
+      if (btnDrawTop) btnDrawTop.addEventListener('click', openDraw);
+      const btnDrawCard = figContainer.querySelector('#btn-draw-diagram-action');
+      if (btnDrawCard) btnDrawCard.addEventListener('click', openDraw);
 
       const dropzone = figContainer.querySelector('#figure-dropzone');
       const fileInput = figContainer.querySelector('#input-figure-file');
@@ -647,7 +755,27 @@ export class QuestionFormComponent {
       });
     });
 
-    // Passage dynamic sub-questions
+    // Enable subquestions button (Short / Long)
+    const btnEnableSq = this.modalEl.querySelector('#btn-enable-subquestions');
+    if (btnEnableSq) {
+      btnEnableSq.addEventListener('click', () => {
+        this.syncFormToData();
+        this.currentData.subQuestions = [{ text: '', marks: 2 }];
+        this.renderDynamicFields();
+      });
+    }
+
+    // Clear subquestions button (Short / Long)
+    const btnClearSq = this.modalEl.querySelector('#btn-clear-subquestions');
+    if (btnClearSq) {
+      btnClearSq.addEventListener('click', () => {
+        this.syncFormToData();
+        delete this.currentData.subQuestions;
+        this.renderDynamicFields();
+      });
+    }
+
+    // Passage & Short/Long dynamic sub-questions
     const btnAddSq = this.modalEl.querySelector('#btn-add-subquestion');
     if (btnAddSq) {
       btnAddSq.addEventListener('click', () => {
@@ -664,9 +792,13 @@ export class QuestionFormComponent {
       btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.index);
         this.syncFormToData();
-        this.currentData.subQuestions.splice(idx, 1);
-        if (this.currentData.subQuestions.length === 0) {
-          this.currentData.subQuestions.push({ text: '', marks: 2 });
+        if (Array.isArray(this.currentData.subQuestions)) {
+          this.currentData.subQuestions.splice(idx, 1);
+          if (this.currentData.type === 'passage' && this.currentData.subQuestions.length === 0) {
+            this.currentData.subQuestions.push({ text: '', marks: 2 });
+          } else if (this.currentData.subQuestions.length === 0) {
+            delete this.currentData.subQuestions;
+          }
         }
         this.renderDynamicFields();
       });
@@ -760,6 +892,24 @@ export class QuestionFormComponent {
     } else if (type === 'short' || type === 'long') {
       const textInput = this.modalEl.querySelector('#input-question-text');
       if (textInput) this.currentData.text = textInput.value;
+
+      const rows = this.modalEl.querySelectorAll('#subquestions-list .dynamic-row');
+      if (rows.length > 0) {
+        const subQuestions = [];
+        rows.forEach(r => {
+          const textInp = r.querySelector('.sq-text-input');
+          const marksInp = r.querySelector('.sq-marks-input');
+          const txt = textInp ? textInp.value : '';
+          const m = marksInp && marksInp.value !== '' ? Number(marksInp.value) : null;
+          subQuestions.push({
+            text: txt,
+            marks: m
+          });
+        });
+        this.currentData.subQuestions = subQuestions;
+      } else if (this.currentData.subQuestions) {
+        delete this.currentData.subQuestions;
+      }
     } else if (type === 'passage') {
       const passageInp = this.modalEl.querySelector('#input-passage-text');
       if (passageInp) this.currentData.passage = passageInp.value;
@@ -799,6 +949,17 @@ export class QuestionFormComponent {
 
   handleSave() {
     this.syncFormToData();
+
+    if (this.currentData.type === 'short' || this.currentData.type === 'long') {
+      if (Array.isArray(this.currentData.subQuestions)) {
+        const valid = this.currentData.subQuestions.filter(sq => sq && sq.text && String(sq.text).trim());
+        if (valid.length > 0) {
+          this.currentData.subQuestions = valid;
+        } else {
+          delete this.currentData.subQuestions;
+        }
+      }
+    }
 
     const validation = validateQuestion(this.currentData);
     const alertBox = this.modalEl.querySelector('#form-validation-alert');

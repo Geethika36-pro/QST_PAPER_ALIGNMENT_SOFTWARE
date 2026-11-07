@@ -453,6 +453,99 @@ class IntegrationTests(unittest.TestCase):
             self.assertIn('Prove that <tag> & "quotes"', all_text)
             self.assertIn('Fig. <X> & "Y"', all_text)
 
+    def test_maths_diagram_and_short_long_subquestions(self):
+        paper = {
+            'school': 'EXCELLENCE PUBLIC SCHOOL',
+            'exam': 'ANNUAL MATHEMATICS EXAMINATION',
+            'class': 'IX',
+            'subject': 'MATHEMATICS',
+            'time': '3 hrs',
+            'totalMarks': 80,
+            'sections': [
+                {
+                    'label': 'A',
+                    'marksPerQuestion': 4,
+                    'questions': [
+                        {
+                            'type': 'short',
+                            'text': 'In the given geometric figure, ABCD is a rectangle.',
+                            'figure': {
+                                'src': TINY_PNG_B64,
+                                'widthPct': 50,
+                                'align': 'center',
+                                'caption': 'Fig. 1 Rectangle ABCD',
+                            },
+                            'subQuestions': [
+                                {'text': 'Find the length of diagonal AC if AB = 8 cm and BC = 6 cm.', 'marks': 2},
+                                {'text': 'Calculate the perimeter of the rectangle.', 'marks': 2},
+                            ],
+                        },
+                        {
+                            'type': 'long',
+                            'text': 'Answer the following analytical geometry questions:',
+                            'subQuestions': [
+                                {'text': 'State and prove the Mid-Point Theorem.', 'marks': 3},
+                                {'text': 'Using the theorem, find the coordinates of point M.', 'marks': 3},
+                            ],
+                        },
+                        {
+                            'type': 'short',
+                            'text': 'Find the root of the quadratic equation 2x² - 5x + 3 = 0.',
+                        },
+                    ],
+                }
+            ],
+        }
+        payload = json.dumps(paper).encode('utf-8')
+
+        # 1. Preview
+        req = urllib.request.Request(
+            f'{self.base_url}/preview',
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            html = resp.read().decode('utf-8')
+            self.assertIn('ABCD is a rectangle', html)
+            self.assertIn('Find the length of diagonal AC', html)
+            self.assertIn('Calculate the perimeter of the rectangle', html)
+            self.assertIn('(2)', html)
+            self.assertIn('State and prove the Mid-Point Theorem', html)
+            self.assertIn('Find the root of the quadratic equation', html)
+            self.assertIn('Fig. 1 Rectangle ABCD', html)
+
+        # 2. PDF
+        req = urllib.request.Request(
+            f'{self.base_url}/generate?format=pdf',
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            pdf = resp.read()
+            self.assertTrue(pdf.startswith(b'%PDF'))
+
+        # 3. DOCX
+        req = urllib.request.Request(
+            f'{self.base_url}/generate?format=docx',
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            doc = Document(io.BytesIO(resp.read()))
+            all_text = ' '.join(p.text for p in doc.paragraphs)
+            self.assertIn('ABCD is a rectangle', all_text)
+            self.assertIn('Find the length of diagonal AC', all_text)
+            self.assertIn('Calculate the perimeter of the rectangle', all_text)
+            self.assertIn('(2)', all_text)
+            self.assertIn('State and prove the Mid-Point Theorem', all_text)
+            self.assertIn('Find the root of the quadratic equation', all_text)
+
 
 if __name__ == '__main__':
     unittest.main()

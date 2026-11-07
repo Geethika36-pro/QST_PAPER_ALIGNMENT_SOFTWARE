@@ -183,8 +183,16 @@ function renderPartial(row) {
   }
 
   if (qtype === 'short' || qtype === 'long') {
+    const validSub = (q.subQuestions || []).filter(sq => sq.text && String(sq.text).trim());
+    const subHtml = validSub.map((sq, idx) => {
+      const marksHtml = (sq.marks !== undefined && sq.marks !== null && sq.marks !== '')
+        ? ` <span class='subm'>(${sq.marks})</span>`
+        : '';
+      return `<p class='sub'>${idx + 1}. ${escapeHtml(sq.text)}${marksHtml}</p>`;
+    }).join('\n  ');
+
     return `<div class='q'>
-  <p><b>${no}.</b> ${escapeHtml(q.text)}</p>${figureHtml}
+  <p><b>${no}.</b> ${escapeHtml(q.text)}</p>${figureHtml}${subHtml ? '\n  ' + subHtml : ''}
 </div>`;
   }
 

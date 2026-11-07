@@ -212,9 +212,14 @@ export class SectionListComponent {
       const colA = (q.columnA || []).filter(a => a?.trim());
       return `<span>${colA.length} Match Pairs</span>`;
     }
-    if (q.type === 'passage') {
-      const sub = (q.subQuestions || []).length;
-      return `<span>${sub} Sub-questions</span>`;
+    if (q.type === 'passage' || ((q.type === 'short' || q.type === 'long') && q.subQuestions && q.subQuestions.length > 0)) {
+      const validSub = (q.subQuestions || []).filter(sq => sq?.text && String(sq.text).trim());
+      if (validSub.length > 0) {
+        return `<span>${validSub.length} Sub-questions</span>`;
+      }
+      if (q.type === 'passage') {
+        return `<span>${(q.subQuestions || []).length} Sub-questions</span>`;
+      }
     }
     if (q.type === 'map') {
       const places = (q.places || []).filter(p => p?.trim());

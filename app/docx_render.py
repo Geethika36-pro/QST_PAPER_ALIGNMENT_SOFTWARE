@@ -408,15 +408,29 @@ def render_docx(paper: dict) -> bytes:
                         _set_cant_split(trow)
 
             elif tpl == 'text':  # short or long
+                sub_questions = [sq for sq in q.get('subQuestions', []) if sq.get('text') and str(sq.get('text')).strip()]
+                has_subs = bool(sub_questions)
+
                 p_q = doc.add_paragraph()
                 p_q.paragraph_format.space_before = Pt(6)
                 p_q.paragraph_format.space_after = Pt(2)
-                p_q.paragraph_format.keep_with_next = bool(fig)
+                p_q.paragraph_format.keep_with_next = bool(fig) or has_subs
                 p_q.add_run(f'{no}. ').bold = True
                 p_q.add_run(q.get('text', ''))
 
                 if fig:
-                    _add_figure(doc, fig, keep_with_next=False)
+                    _add_figure(doc, fig, keep_with_next=has_subs)
+
+                for sq_idx, sq in enumerate(sub_questions):
+                    p_sq = doc.add_paragraph()
+                    p_sq.paragraph_format.left_indent = Mm(6)
+                    p_sq.paragraph_format.tab_stops.add_tab_stop(Mm(180), WD_TAB_ALIGNMENT.RIGHT)
+                    p_sq.paragraph_format.space_after = Pt(2)
+                    p_sq.add_run(f'{sq_idx + 1}. {sq.get("text", "")}')
+                    if sq.get('marks') is not None and str(sq.get('marks')).strip() != '':
+                        p_sq.add_run('\t')
+                        r_sqm = p_sq.add_run(f'({sq.get("marks")})')
+                        r_sqm.bold = True
 
             elif tpl == 'passage':
                 p_q = doc.add_paragraph()
