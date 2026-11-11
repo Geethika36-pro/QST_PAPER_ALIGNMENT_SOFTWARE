@@ -13,6 +13,16 @@ env = Environment(
     autoescape=select_autoescape(['html']),
 )
 
+FONT_STACKS = {
+    'Times New Roman': "'Times New Roman', 'Liberation Serif', Tinos, serif",
+    'Arial': "'Arial', 'Liberation Sans', Arimo, sans-serif",
+    'Calibri': "'Calibri', Carlito, sans-serif",
+    'Cambria': "'Cambria', Caladea, serif",
+    'Georgia': "'Georgia', 'Liberation Serif', serif",
+    'Verdana': "'Verdana', 'Liberation Sans', sans-serif",
+    'Courier New': "'Courier New', 'Liberation Mono', monospace",
+}
+
 
 def partial_for(qtype):
     name = 'text' if qtype in ('short', 'long') else str(qtype)
@@ -39,7 +49,19 @@ def build_view(paper: dict) -> dict:
             'marks_line': f'{per}×{count}={per * count}',
         })
     css = (BASE / 'static' / 'paper.css').read_text(encoding='utf-8')
-    return {'paper': paper, 'sections': sections, 'css': css}
+
+    style = paper.get('style', {}) or {}
+    font_family = style.get('fontFamily', 'Times New Roman')
+    font_size = style.get('fontSize', 11)
+    font_stack = FONT_STACKS.get(font_family, FONT_STACKS['Times New Roman'])
+
+    return {
+        'paper': paper,
+        'sections': sections,
+        'css': css,
+        'font_stack': font_stack,
+        'font_size': font_size,
+    }
 
 
 def render_html(paper: dict) -> str:
@@ -48,4 +70,8 @@ def render_html(paper: dict) -> str:
 
 def render_pdf(paper: dict) -> bytes:
     from weasyprint import HTML  # imported here so the server starts even if WeasyPrint is missing
-    return HTML(string=render_html(paper)).write_pdf()
+    from weasyprint.urls import URLFetcher
+
+    # Restrictive URL fetcher permitting only data: URIs
+    fetcher = URLFetcher(allowed_protocols=('data',))
+    return HTML(string=render_html(paper), url_fetcher=fetcher).write_pdf()

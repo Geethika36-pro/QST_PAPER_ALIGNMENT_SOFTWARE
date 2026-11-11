@@ -1,0 +1,8 @@
+{% if fig and fig.get('src') %}
+<div class='q-figure-box align-{{ fig.get('align', 'center') }}' style='break-inside: avoid;'>
+  <img src='{{ fig.get('src') }}' alt='{{ fig.get('caption', 'Figure') }}' style='width: {{ fig.get('widthPct', 50) }}%;' />
+  {% if fig.get('caption') %}
+  <div class='q-figure-caption'>{{ fig.get('caption') }}</div>
+  {% endif %}
+</div>
+{% endif %}

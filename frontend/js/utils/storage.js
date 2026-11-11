@@ -14,7 +14,12 @@ export const StorageService = {
       return { success: true, timestamp };
     } catch (err) {
       console.warn('LocalStorage save failed:', err);
-      return { success: false, error: err.message };
+      const isQuota =
+        err.name === 'QuotaExceededError' ||
+        err.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+        err.code === 22 ||
+        err.code === 1014;
+      return { success: false, isQuotaExceeded: isQuota, error: err.message };
     }
   },
 

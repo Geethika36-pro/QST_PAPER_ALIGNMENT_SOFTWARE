@@ -142,3 +142,213 @@
   from { transform: translateX(100%); opacity: 0; }
   to   { transform: translateX(0); opacity: 1; }
 }
+
+/* ==========================================================================
+   Maths Diagram Drawer & Geometry Canvas Modal
+   ========================================================================== */
+.diagram-drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.diagram-drawer-window {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-border-subtle);
+  width: 100%;
+  max-width: 760px;
+  max-height: 96vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.diagram-drawer-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface-muted);
+}
+
+.diagram-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--color-primary-900);
+}
+
+.diagram-header-sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-weight: normal;
+}
+
+.diagram-toolbar {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tool-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+
+.btn-dtool {
+  background: #ffffff;
+  border: 1px solid var(--color-border-medium);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--color-text-main);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-dtool:hover {
+  background: var(--color-surface-muted);
+  border-color: var(--color-primary-500);
+}
+
+.btn-dtool.active {
+  background: var(--color-primary-600);
+  color: #ffffff;
+  border-color: var(--color-primary-700);
+  font-weight: 600;
+}
+
+.btn-dtool.btn-dtool-erase {
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.btn-dtool.btn-dtool-erase:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.btn-dtool.btn-dtool-erase.active {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #b91c1c;
+  font-weight: 600;
+}
+
+.diagram-checkbox-label {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--color-text-main);
+  user-select: none;
+}
+
+.diagram-canvas-area {
+  position: relative;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 12px;
+  min-height: 440px;
+}
+
+#diagram-main-canvas {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  cursor: crosshair;
+}
+
+.diagram-canvas-area.grid-guide-active #diagram-main-canvas {
+  background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px),
+                    linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.diagram-text-popover {
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid var(--color-border-medium);
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  padding: 8px 10px;
+  z-index: 1010;
+  width: 250px;
+}
+
+.diagram-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-height: 75px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border-subtle);
+  padding: 4px;
+  border-radius: 4px;
+  background: #f8fafc;
+}
+
+.diagram-chip-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.diagram-chip-btn:hover {
+  background: var(--color-primary-100);
+  border-color: var(--color-primary-500);
+}
+
+.diagram-drawer-footer {
+  padding: 10px 18px;
+  border-top: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+

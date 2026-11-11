@@ -32,19 +32,30 @@ A comprehensive, production-ready educational examination paper alignment and fo
    - **Sequence**: Question instruction, chronological sequence events (i, ii, iii, iv), and answer choices.
    - **Assertion–Reason**: Assertion (A), Reason (R), and 4 standard editable choices.
    - **Match**: Question text, Column A entries (1, 2, 3, 4), Column B entries (a, b, c, d), and choices.
-   - **Short Answer**: Question text with marks.
-   - **Long Answer**: Question text with marks.
+   - **Short Answer**: Question text with marks, optional dynamic sub-questions (`a`, `b`, etc.) with individual marks.
+   - **Long Answer**: Question text with marks, optional dynamic sub-questions with individual marks.
    - **Passage-Based**: Reading passage paragraph, dynamic sub-questions with individual marks.
    - **Map-Based**: Map locating text and dynamic list of places.
 
-6. **File Operations & PDF Generation**:
+6. **Maths Diagram Drawing & Figure Insertion**:
+   - **Insert Diagram**: Drag-and-drop, Ctrl+V clipboard paste, or file browser for PNG/JPEG diagrams.
+   - **Draw Maths Diagram**: Built-in interactive geometry sketcher with straight lines, arrows, coordinate axes (X-Y plane), right/general triangles, circles, rectangles, angle arcs, dashed construction lines, freehand pen, text/math labels, and math symbol quick-chips.
+   - **Erase Options**: **🧽 Brush Eraser** (with adjustable Fine, Medium, Large, X-Large size) to erase specific lines or image details, and **✂️ Box Erase** to drag a selection rectangle and immediately remove a specific image, shape, or diagram region.
+   - **Canvas Image Import**: Insert or paste (`Ctrl+V`) reference images directly onto the canvas, edit or erase specific areas, and insert the result into the question.
+   - **Edit / Redraw**: Reopen existing drawings directly on the canvas to refine diagrams or erase unwanted parts.
+
+7. **Page Style & Live Typography Preview**:
+   - Instant preview customization for Font Families (Times New Roman, Arial, Calibri, Cambria, Georgia, Verdana, Courier New) and Base Font Sizes (9pt to 14pt).
+   - Consistent CSS cascade and font scaling across live preview, WeasyPrint PDF, and Microsoft Word DOCX exports.
+
+8. **File Operations & PDF Generation**:
    - **Open / Import**: Import existing `.json` examination paper files with schema validation.
    - **Save / Export**: Export current paper as formatted `.json`.
    - **Load Sample**: One-click load of the Class VII Social Science sample paper.
    - **Download PDF**: High-fidelity print-ready PDF generated via WeasyPrint (`POST /generate`).
    - **Print Preview**: Direct browser print-to-PDF button using `@page A4` styling.
 
-7. **Autosave & Client Fallback**:
+9. **Autosave & Client Fallback**:
    - Automatic draft saving via browser `localStorage`.
    - Session recovery on page reload.
    - Live status indicator (Saved, Autosaved, Unsaved changes).

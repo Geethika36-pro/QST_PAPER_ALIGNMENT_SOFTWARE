@@ -1,3 +1,7 @@
 <div class='q unknown'>
   {{ row.no }}. Unsupported question type: {{ row.q.get('type', 'none') }}
+  {% if row.q.get('figure') %}
+    {% set fig = row.q.get('figure') %}
+    {% include 'partials/_figure.html' %}
+  {% endif %}
 </div>

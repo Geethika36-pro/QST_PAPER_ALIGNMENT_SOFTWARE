@@ -1,7 +1,24 @@
 /**
  * Question Paper Schema Validator
  * Verifies that the JSON paper structure adheres to the required CBSE/ICSE format
+ * Validates paper-level style and question-level figures per contract.
  */
+
+export const ALLOWED_FONTS = [
+  'Times New Roman',
+  'Arial',
+  'Calibri',
+  'Cambria',
+  'Georgia',
+  'Verdana',
+  'Courier New'
+];
+
+export const ALLOWED_SIZES = [9, 10, 10.5, 11, 12, 13, 14];
+export const ALLOWED_WIDTHS = [25, 40, 50, 65, 80, 100];
+export const ALLOWED_ALIGNS = ['left', 'center'];
+export const MAX_FIGURE_BYTES = 1572864; // 1.5 MB
+export const MAX_FIGURES_COUNT = 12;
 
 export function validateQuestionPaper(paper) {
   const errors = [];
@@ -27,7 +44,26 @@ export function validateQuestionPaper(paper) {
     errors.push('Subject is required.');
   }
 
-  // Sections validation
+  // Style validation (optional)
+  if (paper.style !== undefined && paper.style !== null) {
+    if (typeof paper.style !== 'object' || Array.isArray(paper.style)) {
+      errors.push('Style must be an object.');
+    } else {
+      if (paper.style.fontFamily && !ALLOWED_FONTS.includes(paper.style.fontFamily)) {
+        errors.push(`fontFamily must be one of: ${ALLOWED_FONTS.join(', ')}`);
+      }
+      if (paper.style.fontSize !== undefined) {
+        const numSize = Number(paper.style.fontSize);
+        if (!ALLOWED_SIZES.includes(numSize)) {
+          errors.push(`fontSize must be one of: ${ALLOWED_SIZES.join(', ')}`);
+        }
+      }
+    }
+  }
+
+  // Sections validation & total figure count
+  let totalFigures = 0;
+
   if (!Array.isArray(paper.sections)) {
     errors.push('Paper must include a "sections" array.');
   } else if (paper.sections.length === 0) {
@@ -43,8 +79,75 @@ export function validateQuestionPaper(paper) {
       }
       if (!Array.isArray(sec.questions)) {
         errors.push(`${secName} must have a "questions" array.`);
+      } else {
+        sec.questions.forEach((q, qIdx) => {
+          if (q && q.figure) {
+            totalFigures += 1;
+            const figVal = validateFigure(q.figure, `${secName} Q${qIdx + 1}`);
+            if (!figVal.isValid) {
+              errors.push(...figVal.errors);
+            }
+          }
+        });
       }
     });
+  }
+
+  if (totalFigures > MAX_FIGURES_COUNT) {
+    errors.push(`Paper exceeds maximum limit of ${MAX_FIGURES_COUNT} figures (found ${totalFigures}).`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+export function validateFigure(fig, context = 'Figure') {
+  const errors = [];
+  if (!fig || typeof fig !== 'object' || Array.isArray(fig)) {
+    return { isValid: false, errors: [`${context}: Figure must be an object.`] };
+  }
+
+  const src = fig.src;
+  if (!src || typeof src !== 'string') {
+    errors.push(`${context}: Figure src is required and must be a string.`);
+  } else {
+    const isPng = src.startsWith('data:image/png;base64,');
+    const isJpeg = src.startsWith('data:image/jpeg;base64,');
+    if (!isPng && !isJpeg) {
+      errors.push(`${context}: Image source must be a base64 PNG or JPEG data URI.`);
+    } else {
+      const prefix = isPng ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
+      const b64 = src.slice(prefix.length);
+      try {
+        const decodedBytes = Math.round(b64.length * 3 / 4);
+        if (decodedBytes > MAX_FIGURE_BYTES) {
+          errors.push(`${context}: Figure size exceeds 1.5 MB limit.`);
+        }
+      } catch {
+        errors.push(`${context}: Invalid base64 in figure src.`);
+      }
+    }
+  }
+
+  if (fig.widthPct !== undefined && fig.widthPct !== null) {
+    const w = Number(fig.widthPct);
+    if (!ALLOWED_WIDTHS.includes(w)) {
+      errors.push(`${context}: widthPct must be one of: ${ALLOWED_WIDTHS.join(', ')}.`);
+    }
+  }
+
+  if (fig.align !== undefined && fig.align !== null) {
+    if (!ALLOWED_ALIGNS.includes(fig.align)) {
+      errors.push(`${context}: align must be one of: ${ALLOWED_ALIGNS.join(', ')}.`);
+    }
+  }
+
+  if (fig.caption !== undefined && fig.caption !== null) {
+    if (typeof fig.caption !== 'string' || fig.caption.length > 120) {
+      errors.push(`${context}: Caption cannot exceed 120 characters.`);
+    }
   }
 
   return {
@@ -65,6 +168,13 @@ export function validateQuestion(q) {
   const validTypes = ['mcq', 'sequence', 'assertion_reason', 'match', 'short', 'long', 'passage', 'map'];
   if (!validTypes.includes(q.type)) {
     return { isValid: false, errors: [`Unknown question type "${q.type}".`] };
+  }
+
+  if (q.figure) {
+    const figVal = validateFigure(q.figure, 'Question Figure');
+    if (!figVal.isValid) {
+      errors.push(...figVal.errors);
+    }
   }
 
   switch (q.type) {
