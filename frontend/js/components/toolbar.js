@@ -7,6 +7,7 @@ import { store } from '../state.js';
 import { ApiService } from '../api.js';
 import { ModalService } from './modal.js';
 import { FileIOService } from '../utils/fileIO.js';
+import { StorageService } from '../utils/storage.js';
 
 export class ToolbarComponent {
   constructor(containerEl) {
@@ -57,14 +58,14 @@ export class ToolbarComponent {
           <span>Sample</span>
         </button>
 
-        <button id="btn-save-json" class="btn btn-secondary btn-sm" title="Download paper as JSON file">
+        <button id="btn-save-json" class="btn btn-secondary btn-sm" title="Save question paper">
           <span>💾</span>
-          <span>Save JSON</span>
+          <span>Save</span>
         </button>
 
-        <button id="btn-open-json" class="btn btn-secondary btn-sm" title="Open and restore paper from JSON file">
+        <button id="btn-open-json" class="btn btn-secondary btn-sm" title="Open question paper">
           <span>📂</span>
-          <span>Open JSON</span>
+          <span>Open</span>
         </button>
         <input type="file" id="file-input-open-json" accept=".json,application/json" style="display: none;" />
 
@@ -139,17 +140,20 @@ export class ToolbarComponent {
       });
     });
 
-    // Save JSON
+    // Save
     btnSaveJson.addEventListener('click', () => {
+      StorageService.savePaper(store.paper);
+      store.isDirty = false;
+      store.notify('saved_state');
       const res = FileIOService.exportPaper(store.paper);
       if (res.success) {
-        ModalService.toast(`Saved JSON file: ${res.filename}`, 'success');
+        ModalService.toast(`Saved question paper: ${res.filename}`, 'success');
       } else {
-        ModalService.toast(`Failed to save JSON: ${res.error}`, 'error');
+        ModalService.toast(`Failed to save question paper: ${res.error}`, 'error');
       }
     });
 
-    // Open JSON
+    // Open
     btnOpenJson.addEventListener('click', () => {
       fileInputOpen.click();
     });
@@ -161,9 +165,9 @@ export class ToolbarComponent {
       fileInputOpen.value = '';
       if (res.success) {
         store.loadPaper(res.paper);
-        ModalService.toast(`Successfully imported ${file.name}`, 'success');
+        ModalService.toast(`Successfully opened ${file.name}`, 'success');
       } else {
-        let msg = res.error || 'Failed to import JSON file.';
+        let msg = res.error || 'Failed to open question paper file.';
         if (res.validationErrors && res.validationErrors.length) {
           msg += `\n${res.validationErrors.join('\n')}`;
         }
@@ -187,6 +191,11 @@ export class ToolbarComponent {
 
     // Download Export (PDF or Word)
     btnExport.addEventListener('click', async () => {
+      if (this.exportFormat === 'pdf') {
+        this.triggerBrowserPrint();
+        return;
+      }
+
       const btnText = this.container.querySelector('#export-btn-text');
       const icon = this.container.querySelector('#export-icon');
       const formatName = this.exportFormat.toUpperCase();
